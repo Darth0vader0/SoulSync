@@ -2,3 +2,5 @@
 /backend/dist/
 /backend/.env
 /backend/*.log
+/backend/package-lock.json
+/backend/package.json
