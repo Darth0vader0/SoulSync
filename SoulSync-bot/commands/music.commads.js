@@ -1,26 +1,38 @@
-const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
-
-const player = createAudioPlayer();
+const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require("@discordjs/voice");
+const ytdl = require("ytdl-core");
 
 module.exports = {
-    name: 'play',
-    description: 'Play music in a voice channel',
-    async execute(message) {
-        const channel = message.member.voice.channel;
-        if (!channel) return message.reply('❌ You need to join a voice channel first!');
+    name: "play",
+    description: "Plays a song from YouTube",
+    async execute(message, args) {
+        if (!message.member.voice.channel) {
+            return message.reply("❌ You need to be in a voice channel to play music!");
+        }
 
-        const connection = joinVoiceChannel({
-            channelId: channel.id,
-            guildId: message.guild.id,
-            adapterCreator: message.guild.voiceAdapterCreator
-        });
+        if (!args.length) {
+            return message.reply("❌ Please provide a YouTube URL or song name!");
+        }
 
-        const stream = ytdl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', { filter: 'audioonly' });
-        const resource = createAudioResource(stream);
-        player.play(resource);
-        connection.subscribe(player);
+        const url = args[0];
 
-        message.reply('🎶 Now playing: **Never Gonna Give You Up**');
-    }
+        try {
+            const stream = ytdl(url, { filter: "audioonly" });
+            const connection = joinVoiceChannel({
+                channelId: message.member.voice.channel.id,
+                guildId: message.guild.id,
+                adapterCreator: message.guild.voiceAdapterCreator,
+            });
+
+            const player = createAudioPlayer();
+            const resource = createAudioResource(stream);
+
+            player.play(resource);
+            connection.subscribe(player);
+
+            message.reply(`🎶 Now playing: ${url}`);
+        } catch (error) {
+            console.error(error);
+            message.reply("❌ Error playing music. Make sure the link is correct!");
+        }
+    },
 };
