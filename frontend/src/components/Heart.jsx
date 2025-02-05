@@ -1,13 +1,14 @@
-
+import React from 'react';
 import { Heart } from 'lucide-react';
 
 export const Hearts = () => {
-  // Create an array of 15 hearts with random positions and animations
+  // Create an array of hearts with random positions and animations
   const hearts = Array.from({ length: 15 }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
-    animationDelay: `${Math.random() * 5}s`,
-    scale: 0.5 + Math.random() * 0.5
+    animationDelay: `${Math.random() * 10}s`,
+    size: Math.random() * 30 + 16, // Random size between 16px and 32px
+    opacity: Math.random() * 0.5 + 0.5 // Random opacity between 0.3 and 0.8
   }));
 
   return (
@@ -18,12 +19,20 @@ export const Hearts = () => {
           className="absolute animate-float"
           style={{
             left: heart.left,
-            top: '100%',
+            bottom: '-20px', // Start slightly below the viewport
             animationDelay: heart.animationDelay,
-            transform: `scale(${heart.scale})`
+            width: `${heart.size}px`,
+            height: `${heart.size}px`
           }}
         >
-          <Heart className="text-pink-400 opacity-50" />
+          <Heart 
+            className="text-red-600" 
+            style={{ 
+              opacity: heart.opacity,
+              width: '100%',
+              height: '100%'
+            }} 
+          />
         </div>
       ))}
     </div>
