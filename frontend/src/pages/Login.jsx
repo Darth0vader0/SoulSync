@@ -3,17 +3,38 @@ import { Link } from 'react-router-dom';
 import { AuthLayout } from '../components/AuthLayout';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-
+import axios from 'axios';
 export const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login:', formData);
+
+  try {
+    const response = await fetch("http://localhost:3001/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email : formData.email,
+         password :formData.password  }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed");
+    }
+
+    console.log("Login Successful:", data);
+    window.location.href = "/signup";
+  } catch (error) {
+    console.error("Login Error:", error.message);
+  }
+
   };
 
   return (

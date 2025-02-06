@@ -29,9 +29,11 @@ const registerUser = async (req, res) => {
 
 // Login User
 const loginUser = async (req, res) => {
+  console.log("into");
+  
   try {
     const { email, password } = req.body;
-
+    
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
