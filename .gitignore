@@ -4,7 +4,7 @@
 /backend/*.log
 /backend/package-lock.json
 /backend/package.json
-/SoulSync-bot/node_modules/
+/SoulSync-bot/node_modules/ 
 /SoulSync-bot/config.env/
 /SoulSync-bot/package.json/
 /SoulSync-bot/package-lock.json/
