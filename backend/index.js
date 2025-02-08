@@ -8,6 +8,7 @@ const app = express();
 const PORT = 3001;
 const {registerUser, loginUser} = require('./controllers/auth.controller')
 const {sendMessage,getMessages} = require('./controllers/message.controller')
+const serverRoutes = require('./routes/server.routes')
 const authMiddleware = require('./middleware/auth.middleware');
 // Connect to MongoDB
 db();
@@ -27,8 +28,10 @@ app.use(limiter);
 app.post('/signup', registerUser)
 app.post('/login', loginUser)
 
-
 //messages api
 app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
+
+//server routes
+app.use('/api', serverRoutes)
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
