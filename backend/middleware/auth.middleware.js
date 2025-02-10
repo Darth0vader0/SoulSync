@@ -1,13 +1,15 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 
 const authMiddleware = (req, res, next) => {
-  // Get token from the Authorization header
-  const token = req.header("Authorization");
+  // Log headers to check if Authorization header is present
+  console.log("Headers:", req.headers);
 
-  // Check if token exists
-  if (!token)
+  // Get token from the Authorization header
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });
+  }
 
   // Verify the token
   try {
@@ -15,6 +17,7 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded; // Attach decoded user data to request object
     next(); // Continue to the next middleware or route handler
   } catch (error) {
+    console.error("Invalid token:", error);
     res.status(400).json({ message: "Token is not valid" });
   }
 };

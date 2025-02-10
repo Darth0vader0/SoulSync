@@ -3,9 +3,13 @@ const Channel = require('../models/channel.model'); // Import Channel model (for
 
 // Create a new server
 const createServer = async (req, res) => {
+  console.log("into");
+  console.log("next");
+  
+  
   try {
     const { name } = req.body;
-    const userId = req.user.id; // Assuming authentication middleware attaches `user` object to `req`
+    const userId = req.user.userId; // Assuming authentication middleware attaches `user` object to `req`
 
     if (!name) {
       return res.status(400).json({ error: 'Server name is required' });

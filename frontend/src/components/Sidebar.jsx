@@ -5,7 +5,8 @@ import { Menu, X, Hash, Plus, Settings, Mic, Headphones, MessageSquare } from "l
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const [serverName, setServerName] = useState("");
+const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const servers = [
@@ -25,6 +26,32 @@ const Sidebar = () => {
     { id: 2, name: "Bob", status: "idle" },
     { id: 3, name: "Charlie", status: "dnd" },
   ];
+
+  const handleCreateServer = async () => {
+    if (!serverName) {
+      setError("Server name is required");
+      return;
+    }
+    try {
+      const response = await fetch("http://localhost:3001/createServer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" ,
+           "Authorization": `Bearer ${token}`,
+
+        },
+        body: JSON.stringify({ name: serverName }),
+      });
+
+      if (!response.ok) throw new Error("Failed to create server");
+
+      const data = await response.json();
+      setServers([...servers, data]); // Add new server to state
+      setServerName("");
+      document.getElementById("my_modal_3").close();
+    } catch (err) {
+      setError("Failed to create server");
+    }
+  };
 
   return (
     <>
@@ -62,14 +89,27 @@ const Sidebar = () => {
           {/* You can open the modal using document.getElementById('ID').showModal() method */}
            
             <button className="w-12 h-12 rounded-full bg-[#36393f] flex items-center justify-center text-white cursor-pointer hover:rounded-2xl transition-all duration-200" onClick={() => document.getElementById('my_modal_3').showModal()}> <Plus size={20} /></button>
-          <dialog id="my_modal_3" className="modal">
+            <dialog id="my_modal_3" className="modal">
             <div className="modal-box">
               <form method="dialog">
-                {/* if there is a button in form, it will close the modal */}
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+                  ✕
+                </button>
               </form>
-              <h3 className="font-bold text-lg">Hello!</h3>
-              <p className="py-4">Press ESC key or click on ✕ button to close</p>
+              <h3 className="font-bold text-lg">Create a Server</h3>
+              <input
+                type="text"
+                placeholder="Enter server name"
+                className="input input-bordered w-full mt-3"
+                value={serverName}
+                onChange={(e) => setServerName(e.target.value)}
+              />
+              <button
+                className="btn btn-primary mt-3"
+                onClick={handleCreateServer}
+              >
+                Create
+              </button>
             </div>
           </dialog>
         </div>
