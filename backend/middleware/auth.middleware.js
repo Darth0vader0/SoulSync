@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  // Log headers to check if Authorization header is present
-  console.log("Headers:", req.headers);
+  // Log cookies to check if JWT is present
+  console.log("Cookies:", req.cookies);
 
-  // Get token from the Authorization header
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  // Get token from cookies
+  const token = req.cookies.jwt;
 
   if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });

@@ -16,11 +16,14 @@ export const Login = () => {
   try {
     const response = await fetch("http://localhost:3001/login", {
       method: "POST",
+      credentials: "include", // Important for cookies
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email : formData.email,
-         password :formData.password  }),
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
     });
 
     const data = await response.json();
@@ -30,7 +33,7 @@ export const Login = () => {
     }
 
     console.log("Login Successful:", data);
-    window.location.href = "/signup";
+    window.location.href = "/serverPage";
   } catch (error) {
     console.error("Login Error:", error.message);
   }

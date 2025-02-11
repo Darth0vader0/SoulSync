@@ -1,6 +1,6 @@
 const Server = require('../models/server.model'); // Import Server model
 const Channel = require('../models/channel.model'); // Import Channel model (for default channels)
-
+const jwt = require('jsonwebtoken');
 // Create a new server
 const createServer = async (req, res) => {
   console.log("into");
@@ -9,12 +9,22 @@ const createServer = async (req, res) => {
   
   try {
     const { name } = req.body;
-    const userId = req.user.userId; // Assuming authentication middleware attaches `user` object to `req`
+    console.log(req.cookies.jwt)
 
+     // Assuming authentication middleware attaches `user` object to `req`
+    
     if (!name) {
       return res.status(400).json({ error: 'Server name is required' });
     }
 
+    const token = req.cookies.jwt;
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId; // Assuming JWT token contains user ID
     // Create new server
     const newServer = new Server({
       name,

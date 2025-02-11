@@ -43,7 +43,13 @@ const loginUser = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     // Generate JWT Token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+    res.cookie("jwt",token,{
+      maxAge :3600*1000,
+      httpOnly:true,
+      sameSite: "Lax",
+  });
+
     res.status(200).json({ message: "Login successful" });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });

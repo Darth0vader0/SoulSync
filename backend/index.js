@@ -5,16 +5,23 @@ const dotNet = require("dotenv");
 dotNet.config();
 const app = express();
 
+
 const PORT = 3001;
 const {registerUser, loginUser} = require('./controllers/auth.controller')
 const {sendMessage,getMessages} = require('./controllers/message.controller')
 const serverRoutes = require('./routes/server.routes')
 const authMiddleware = require('./middleware/auth.middleware');
 const { createServer } = require('./controllers/server.controller');
-
+const cookieParse = require('cookie-parser');
+app.use(cookieParse());
 // Connect to MongoDB
 db();
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ 
+
+  origin: "http://localhost:5173", // Frontend URL
+  credentials: true, // Required for cookies
+  
+ }));
 const rateLimit = require("express-rate-limit");
 app.use(express.json());
 
@@ -35,5 +42,5 @@ app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
 
 //server routes
-app.post('/createServer', authMiddleware, createServer);
+app.post('/createServer', createServer);
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

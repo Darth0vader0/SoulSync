@@ -28,6 +28,8 @@ const [error, setError] = useState("");
   ];
 
   const handleCreateServer = async () => {
+    console.log("into create server");
+    
     if (!serverName) {
       setError("Server name is required");
       return;
@@ -35,9 +37,8 @@ const [error, setError] = useState("");
     try {
       const response = await fetch("http://localhost:3001/createServer", {
         method: "POST",
+        credentials:"include",
         headers: { "Content-Type": "application/json" ,
-           "Authorization": `Bearer ${token}`,
-
         },
         body: JSON.stringify({ name: serverName }),
       });
@@ -45,8 +46,7 @@ const [error, setError] = useState("");
       if (!response.ok) throw new Error("Failed to create server");
 
       const data = await response.json();
-      setServers([...servers, data]); // Add new server to state
-      setServerName("");
+     
       document.getElementById("my_modal_3").close();
     } catch (err) {
       setError("Failed to create server");
