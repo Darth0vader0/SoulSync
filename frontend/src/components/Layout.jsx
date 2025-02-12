@@ -3,10 +3,13 @@ import Sidebar from "../components/Sidebar";
 
  const Layout = ({ children }) => {
   return (
-    <div className="flex md:flex-row flex-col h-screen bg-[#36393f] text-[#dcddde]">
-    <Sidebar />
-    <main className="flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
+    <div className="flex h-screen w-full">
+    <Sidebar className="w-72 flex-shrink-0" /> {/* Sidebar has fixed width */}
+    <main className="flex-1 flex flex-col">  {/* Main content takes remaining space */}
+      {children}
+    </main>
   </div>
+  
   
   );
 };

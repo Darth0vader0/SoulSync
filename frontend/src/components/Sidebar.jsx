@@ -1,35 +1,29 @@
-"use client";
-
 import { useState } from "react";
-import { Menu, X, Hash, Plus, Settings, Mic, Headphones, MessageSquare } from "lucide-react";
+import { Menu, X, Hash, Plus, Settings, Mic, Headphones, MessageSquare, Volume2 } from "lucide-react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [serverName, setServerName] = useState("");
-const [error, setError] = useState("");
+  const [channelName, setChannelName] = useState("");
+  const [voiceChannelName, setVoiceChannelName] = useState("");
+  const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
-  const servers = [
-    
-  ];
+  const servers = [];
 
   const textChannels = [
-   
+    { id: 1, name: "general", isActive: true },
+    { id: 2, name: "announcements", isActive: false },
+    { id: 3, name: "off-topic", isActive: false }
   ];
 
   const voiceChannels = [
-  
-  ];
-
-  const directMessages = [
-    { id: 1, name: "Alice", status: "online" },
-    { id: 2, name: "Bob", status: "idle" },
-    { id: 3, name: "Charlie", status: "dnd" },
+    { id: 1, name: "General Voice", users: ["Alice", "Bob"], isActive: false },
+    { id: 2, name: "Gaming", users: ["Charlie"], isActive: false },
+    { id: 3, name: "Music", users: [], isActive: false }
   ];
 
   const handleCreateServer = async () => {
-    console.log("into create server");
-    
     if (!serverName) {
       setError("Server name is required");
       return;
@@ -37,17 +31,15 @@ const [error, setError] = useState("");
     try {
       const response = await fetch("http://localhost:3001/createServer", {
         method: "POST",
-        credentials:"include",
-        headers: { "Content-Type": "application/json" ,
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: serverName }),
       });
 
       if (!response.ok) throw new Error("Failed to create server");
-
       const data = await response.json();
-     
-      document.getElementById("my_modal_3").close();
+      document.getElementById("my_modal_3")?.close();
+      setServerName("");
     } catch (err) {
       setError("Failed to create server");
     }
@@ -63,18 +55,15 @@ const [error, setError] = useState("");
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-
-      {/* Combined sidebar for mobile */}
+      {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 z-40 h-screen w-full md:w-[332px] bg-[#202225] transition-transform duration-300 ease-in-out flex ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-          }`}
+        className={`fixed md:static left-0 top-0 h-screen w-[332px] bg-[#202225] transition-transform duration-300 ease-in-out flex ${
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
       >
         {/* Server list */}
         <div className="w-[72px] bg-[#202225] pt-3 flex flex-col items-center space-y-2">
-          <div
-            key={90}
-            className="w-12 h-12 rounded-full bg-[#36393f] flex items-center justify-center text-white cursor-pointer hover:rounded-2xl transition-all duration-200"
-          >
+          <div className="w-12 h-12 rounded-full bg-[#36393f] flex items-center justify-center text-white cursor-pointer hover:rounded-2xl transition-all duration-200">
             {""}
           </div>
           {servers.map((server) => (
@@ -85,30 +74,34 @@ const [error, setError] = useState("");
               {server.initial}
             </div>
           ))}
-         
-          {/* You can open the modal using document.getElementById('ID').showModal() method */}
-           
-            <button className="w-12 h-12 rounded-full bg-[#36393f] flex items-center justify-center text-white cursor-pointer hover:rounded-2xl transition-all duration-200" onClick={() => document.getElementById('my_modal_3').showModal()}> <Plus size={20} /></button>
-            <dialog id="my_modal_3" className="modal">
-            <div className="modal-box">
+          
+          <button 
+            className="w-12 h-12 rounded-full bg-[#36393f] flex items-center justify-center text-[#3ba55d] cursor-pointer hover:rounded-2xl hover:bg-[#3ba55d] hover:text-white transition-all duration-200" 
+            onClick={() => document.getElementById('my_modal_3')?.showModal()}
+          >
+            <Plus size={20} />
+          </button>
+
+          {/* Server Creation Modal */}
+          <dialog id="my_modal_3" className="modal">
+            <div className="modal-box bg-[#36393f] text-[#dcddde]">
               <form method="dialog">
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
-                  ✕
-                </button>
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]">✕</button>
               </form>
-              <h3 className="font-bold text-lg">Create a Server</h3>
+              <h3 className="font-bold text-lg mb-4">Create a Server</h3>
               <input
                 type="text"
                 placeholder="Enter server name"
-                className="input input-bordered w-full mt-3"
+                className="input input-bordered w-full bg-[#202225] text-[#dcddde] border-[#040405] focus:border-[#5865F2]"
                 value={serverName}
                 onChange={(e) => setServerName(e.target.value)}
               />
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
               <button
-                className="btn btn-primary mt-3"
+                className="btn bg-[#5865F2] hover:bg-[#4752C4] text-white w-full mt-4"
                 onClick={handleCreateServer}
               >
-                Create
+                Create Server
               </button>
             </div>
           </dialog>
@@ -127,26 +120,23 @@ const [error, setError] = useState("");
             <div>
               <h2 className="flex items-center justify-between text-xs font-semibold uppercase text-[#8e9297] px-2 mb-1">
                 Text Channels
-                <button className="rounded-full " onClick={() => document.getElementById('my_modal_2').showModal()}> <Plus size={16} /></button>
-          <dialog id="my_modal_2" className="modal">
-            <div className="modal-box">
-              <form method="dialog">
-                {/* if there is a button in form, it will close the modal */}
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-              </form>
-             
-            </div>
-          </dialog>
+                <button className="hover:text-[#dcddde]" onClick={() => document.getElementById('my_modal_2')?.showModal()}>
+                  <Plus size={16} />
+                </button>
               </h2>
               <ul className="space-y-1">
                 {textChannels.map((channel) => (
                   <li key={channel.id}>
                     <a
                       href={`#${channel.name}`}
-                      className="flex items-center rounded px-2 py-1 text-[#8e9297] hover:bg-[#393c43] hover:text-[#dcddde]"
+                      className={`flex items-center rounded px-2 py-1 ${
+                        channel.isActive 
+                          ? 'bg-[#393c43] text-[#dcddde]' 
+                          : 'text-[#8e9297] hover:bg-[#393c43] hover:text-[#dcddde]'
+                      } group relative`}
                     >
-                      <Hash size={18} className="mr-2" />
-                      {channel.name}
+                      <Hash size={18} className="mr-2 flex-shrink-0" />
+                      <span className="truncate">{channel.name}</span>
                     </a>
                   </li>
                 ))}
@@ -157,34 +147,40 @@ const [error, setError] = useState("");
             <div>
               <h2 className="flex items-center justify-between text-xs font-semibold uppercase text-[#8e9297] px-2 mb-1">
                 Voice Channels
-                <button className="rounded-full " onClick={() => document.getElementById('my_modal_1').showModal()}> <Plus size={16} /></button>
-          <dialog id="my_modal_1" className="modal">
-            <div className="modal-box">
-              <form method="dialog">
-                {/* if there is a button in form, it will close the modal */}
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-              </form>
-             
-            </div>
-          </dialog>
+                <button className="hover:text-[#dcddde]" onClick={() => document.getElementById('my_modal_1')?.showModal()}>
+                  <Plus size={16} />
+                </button>
               </h2>
               <ul className="space-y-1">
                 {voiceChannels.map((channel) => (
                   <li key={channel.id}>
-                    <a
-                      href={`#${channel.name}`}
-                      className="flex items-center rounded px-2 py-1 text-[#8e9297] hover:bg-[#393c43] hover:text-[#dcddde]"
-                    >
-                      <MessageSquare size={18} className="mr-2" />
-                      {channel.name}
-                    </a>
+                    <div className="space-y-1">
+                      <a
+                        href={`#${channel.name}`}
+                        className={`flex items-center rounded px-2 py-1 ${
+                          channel.isActive 
+                            ? 'bg-[#393c43] text-[#dcddde]' 
+                            : 'text-[#8e9297] hover:bg-[#393c43] hover:text-[#dcddde]'
+                        } group`}
+                      >
+                        <Volume2 size={18} className="mr-2 flex-shrink-0" />
+                        <span className="truncate">{channel.name}</span>
+                      </a>
+                      {channel.users.length > 0 && (
+                        <div className="ml-9 space-y-1">
+                          {channel.users.map((user, idx) => (
+                            <div key={idx} className="flex items-center text-sm text-[#8e9297]">
+                              <div className="w-2 h-2 rounded-full bg-[#3ba55d] mr-2"></div>
+                              {user}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
             </div>
-
-            {/* Direct Messages */}
-
           </div>
 
           {/* User area */}
@@ -194,7 +190,7 @@ const [error, setError] = useState("");
                 U
               </div>
               <div>
-                <div className="text-sm font-medium">Username</div>
+                <div className="text-sm font-medium text-white">Username</div>
                 <div className="text-xs text-[#b9bbbe]">#1234</div>
               </div>
             </div>
@@ -212,15 +208,8 @@ const [error, setError] = useState("");
           </div>
         </div>
       </div>
-
-      {/* Main content area */}
-      <div className="md:ml-[332px] p-4">
-        <h1 className="text-2xl flex-col font-bold mb-4"><br /><br /><p>Welcome to SoulSync</p></h1>
-        <p>Select a channel or direct message to start chatting!</p>
-      </div>
     </>
   );
 };
-
 
 export default Sidebar;
