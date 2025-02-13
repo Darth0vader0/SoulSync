@@ -57,7 +57,7 @@ const ChannelUI = ({ channelName = "general" }) => {
           <button className="hover:text-[#dcddde]">
             <Users size={20} />
           </button>
-          <div className="relative">
+          <div className="">
             <input
               type="text"
               placeholder="Search"
@@ -93,10 +93,8 @@ const ChannelUI = ({ channelName = "general" }) => {
 
       {/* Message Input */}
       <div className="px-4 py-4 bg-[#36393f]">
-        <div className="relative flex items-center">
-          <button className="absolute left-4 text-[#b9bbbe] hover:text-[#dcddde]">
-            <PlusCircle size={22} />
-          </button>
+        <div className="flex items-center">
+         
           <input
             type="text"
             value={message}
@@ -105,7 +103,7 @@ const ChannelUI = ({ channelName = "general" }) => {
             placeholder={`Message #${channelName}`}
             className="w-full bg-[#40444b] text-[#dcddde] px-12 py-3 rounded-lg focus:outline-none"
           />
-          <div className="absolute right-4 flex items-center space-x-4">
+          <div className="flex right-4  items-center space-x-4">
             <button className="text-[#b9bbbe] hover:text-[#dcddde]">
               <Gift size={22} />
             </button>

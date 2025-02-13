@@ -5,9 +5,9 @@ import Layout from '../components/Layout';
 import ChannelUI from '../components/ChannelUi';
 import VoiceChannelUI from '../components/VoiceChannelUi.jsx';
 
-function App() {
+function ServerPage() {
   const [activeChannel, setActiveChannel] = useState({
-    type: 'text', // or 'voice'
+    type: 'voice', // or 'voice'
     name: 'general'
   });
 
@@ -23,4 +23,4 @@ function App() {
   );
 }
 
-export default App;
+export default ServerPage;
