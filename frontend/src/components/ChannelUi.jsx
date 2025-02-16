@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Hash, UserPlus, Bell, Pin, Users, InboxIcon, HelpCircle, PlusCircle, Gift, Sticker, AArrowDown as GIF, Smile as EmojiSmile, Send } from 'lucide-react';
 
-const ChannelUI = ({ channelName = "general" }) => {
+const ChannelUI = ({ channelName = "general  " }) => {
   const [message, setMessage] = useState('');
 
   const messages = [
@@ -45,18 +45,8 @@ const ChannelUI = ({ channelName = "general" }) => {
           <span className="font-bold text-white">{channelName}</span>
         </div>
         <div className="flex items-center space-x-4 text-[#b9bbbe]">
-          <button className="hover:text-[#dcddde]">
-            <UserPlus size={20} />
-          </button>
-          <button className="hover:text-[#dcddde]">
-            <Bell size={20} />
-          </button>
-          <button className="hover:text-[#dcddde]">
-            <Pin size={20} />
-          </button>
-          <button className="hover:text-[#dcddde]">
-            <Users size={20} />
-          </button>
+          
+          
           <div className="">
             <input
               type="text"
@@ -68,7 +58,7 @@ const ChannelUI = ({ channelName = "general" }) => {
             <InboxIcon size={20} />
           </button>
           <button className="hover:text-[#dcddde]">
-            <HelpCircle size={20} />
+            <UserPlus size={20} />
           </button>
         </div>
       </div>
@@ -104,15 +94,7 @@ const ChannelUI = ({ channelName = "general" }) => {
             className="w-full bg-[#40444b] text-[#dcddde] px-12 py-3 rounded-lg focus:outline-none"
           />
           <div className="flex right-4  items-center space-x-4">
-            <button className="text-[#b9bbbe] hover:text-[#dcddde]">
-              <Gift size={22} />
-            </button>
-            <button className="text-[#b9bbbe] hover:text-[#dcddde]">
-              <GIF size={22} />
-            </button>
-            <button className="text-[#b9bbbe] hover:text-[#dcddde]">
-              <Sticker size={22} />
-            </button>
+            
             <button className="text-[#b9bbbe] hover:text-[#dcddde]">
               <EmojiSmile size={22} />
             </button>

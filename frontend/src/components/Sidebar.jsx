@@ -1,27 +1,33 @@
 import { useState } from "react";
 import { Menu, X, Hash, Plus, Settings, Mic, Headphones, MessageSquare, Volume2 } from "lucide-react";
 
-const Sidebar = () => {
+const Sidebar = ({setActiveChannel}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [serverName, setServerName] = useState("");
   const [channelName, setChannelName] = useState("");
   const [voiceChannelName, setVoiceChannelName] = useState("");
+  const [selectedChannel, setSelectedChannel] = useState(null);
   const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const servers = [];
 
   const textChannels = [
-    { id: 1, name: "general", isActive: true },
-    { id: 2, name: "announcements", isActive: false },
-    { id: 3, name: "off-topic", isActive: false }
+    { id: 1, name: "general", isActive: true ,type: "text"},
+    { id: 2, name: "announcements", isActive: false, type: "text"},
+    { id: 3, name: "off-topic", isActive: false, type: "text"}
   ];
 
   const voiceChannels = [
-    { id: 1, name: "General Voice", users: ["Alice", "Bob"], isActive: false },
-    { id: 2, name: "Gaming", users: ["Charlie"], isActive: false },
-    { id: 3, name: "Music", users: [], isActive: false }
+    { id: 1, name: "General Voice", users: ["Alice", "Bob"], isActive: false ,type:"voice"},
+    { id: 2, name: "Gaming", users: ["Charlie"], isActive: false ,type:"voice"},
+    { id: 3, name: "Music", users: [], isActive: false ,type:"voice"}
   ];
+  
+  const handleChannelClick = (channel) => {
+    setSelectedChannel(channel.id); // Update selected channel UI
+    setActiveChannel(channel); // Send to ServerPage.jsx
+  };
 
   const handleCreateServer = async () => {
     if (!serverName) {
@@ -134,7 +140,8 @@ const Sidebar = () => {
                           ? 'bg-[#393c43] text-[#dcddde]' 
                           : 'text-[#8e9297] hover:bg-[#393c43] hover:text-[#dcddde]'
                       } group relative`}
-                    >
+                      onClick={()=>handleChannelClick(channel)}
+                   >
                       <Hash size={18} className="mr-2 flex-shrink-0" />
                       <span className="truncate">{channel.name}</span>
                     </a>
@@ -162,6 +169,7 @@ const Sidebar = () => {
                             ? 'bg-[#393c43] text-[#dcddde]' 
                             : 'text-[#8e9297] hover:bg-[#393c43] hover:text-[#dcddde]'
                         } group`}
+                        onClick={()=>handleChannelClick(channel)}
                       >
                         <Volume2 size={18} className="mr-2 flex-shrink-0" />
                         <span className="truncate">{channel.name}</span>
