@@ -64,4 +64,32 @@ const createServer = async (req, res) => {
   }
 };
 
-module.exports = { createServer };
+const getServers = async (req,res)=>{
+  console.log("into");
+  
+  const token = req.cookies.jwt;
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  // Verify token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  // Assuming JWT token contains user ID
+
+  try {
+    const userId = decoded.userId; // Get user ID from token
+
+    // Find servers where the user is an owner or a member
+    const servers = await Server.find({
+        $or: [{ owner: userId }, { members: userId }]
+    });
+    console.log(servers);
+    
+    res.json({ success: true, servers });
+} catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+}
+  
+}
+
+module.exports = { createServer ,getServers};

@@ -11,7 +11,7 @@ const {registerUser, loginUser} = require('./controllers/auth.controller')
 const {sendMessage,getMessages} = require('./controllers/message.controller')
 const serverRoutes = require('./routes/server.routes')
 const authMiddleware = require('./middleware/auth.middleware');
-const { createServer } = require('./controllers/server.controller');
+const { createServer,getServers } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
 app.use(cookieParse());
 // Connect to MongoDB
@@ -43,4 +43,5 @@ app.post('/send',sendMessage);
 
 //server routes
 app.post('/createServer', createServer);
+app.get('/getServers',getServers)
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

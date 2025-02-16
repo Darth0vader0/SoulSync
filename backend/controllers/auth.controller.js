@@ -29,7 +29,7 @@ const registerUser = async (req, res) => {
 
 // Login User
 const loginUser = async (req, res) => {
-  console.log("into");
+ 
   
   try {
     const { email, password } = req.body;

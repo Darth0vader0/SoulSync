@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Menu, X, Hash, Plus, Settings, Mic, Headphones, MessageSquare, Volume2 } from "lucide-react";
-
+import { useEffect } from "react";
 const Sidebar = ({setActiveChannel}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [serverName, setServerName] = useState("");
@@ -10,7 +10,39 @@ const Sidebar = ({setActiveChannel}) => {
   const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
-  const servers = [];
+  const [servers, setServers] = useState([]);
+
+  async function getServers() {
+    try {
+      const response = await fetch('/getServers', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch servers');
+      }
+  
+      const data = await response.json(); // Convert response to JSON
+      return data; // Return the data
+    } catch (error) {
+      console.error("Error fetching servers:", error);
+      return null; // Return null if error occurs
+    }
+  }
+  useEffect(() => {
+    async function fetchServers() {
+      const data = await getServers();
+      if (data) {
+        setServers(data);
+      }
+    }
+    
+    fetchServers();
+  }, []);
 
   const textChannels = [
     { id: 1, name: "general", isActive: true ,type: "text"},
