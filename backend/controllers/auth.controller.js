@@ -32,6 +32,8 @@ const loginUser = async (req, res) => {
  
   
   try {
+    console.log("into");
+    
     const { email, password } = req.body;
     
     // Check if user exists

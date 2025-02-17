@@ -10,40 +10,7 @@ const Sidebar = ({setActiveChannel}) => {
   const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
-  const [servers, setServers] = useState([]);
-
-  async function getServers() {
-    try {
-      const response = await fetch('/getServers', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to fetch servers');
-      }
-  
-      const data = await response.json(); // Convert response to JSON
-      return data; // Return the data
-    } catch (error) {
-      console.error("Error fetching servers:", error);
-      return null; // Return null if error occurs
-    }
-  }
-  useEffect(() => {
-    async function fetchServers() {
-      const data = await getServers();
-      if (data) {
-        setServers(data);
-      }
-    }
-    
-    fetchServers();
-  }, []);
-
+  const [servers, setServers] = useState([])
   const textChannels = [
     { id: 1, name: "general", isActive: true ,type: "text"},
     { id: 2, name: "announcements", isActive: false, type: "text"},
@@ -56,6 +23,32 @@ const Sidebar = ({setActiveChannel}) => {
     { id: 3, name: "Music", users: [], isActive: false ,type:"voice"}
   ];
   
+  useEffect(() => {
+    const fetchServers = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/getServers", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (!response.ok) throw new Error("Failed to fetch data");
+  
+        const result = await response.json();
+        console.log("Fetched servers:", result.servers); // ✅ Log here
+        setServers(result.servers);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+  
+    fetchServers();
+  }, []);
+  
+ 
+
   const handleChannelClick = (channel) => {
     setSelectedChannel(channel.id); // Update selected channel UI
     setActiveChannel(channel); // Send to ServerPage.jsx

@@ -84,6 +84,7 @@ const getServers = async (req,res)=>{
         $or: [{ owner: userId }, { members: userId }]
     });
     console.log(servers);
+    console.log("done");
     
     res.json({ success: true, servers });
 } catch (error) {
