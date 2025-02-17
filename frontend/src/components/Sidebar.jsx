@@ -43,10 +43,38 @@ const Sidebar = ({setActiveChannel}) => {
         setError(err.message);
       }
     };
+
   
-    fetchServers();
+  fetchServers();
   }, []);
-  
+
+  useEffect(() => {
+    if (servers.length === 0) return; // Prevent fetching with empty servers
+
+    const fetchChannels = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/getChannels", {
+          method: "POST", // Change to POST since we're sending a body
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            channelIds:servers[0].channels, // Extract all channel IDs
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch data");
+
+        const result = await response.json();
+        console.log("Fetched channels:", result);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchChannels();
+  }, [servers]); // Run only when `servers` update
  
 
   const handleChannelClick = (channel) => {

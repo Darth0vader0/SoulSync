@@ -93,4 +93,24 @@ const getServers = async (req,res)=>{
   
 }
 
-module.exports = { createServer ,getServers};
+const getChannels = async (req, res) => {
+  console.log("Into /getChannels route");
+
+  try {
+    const { channelIds } = req.body; // Expecting an array of ObjectIds in the body
+    console.log(channelIds);
+
+    if (!channelIds || !Array.isArray(channelIds)) {
+      return res.status(400).json({ error: "Invalid channel IDs" });
+    }
+
+    // Convert to ObjectId and find the channels
+    const channels = await Channel.find({ _id: { $in: channelIds } });
+
+    res.json(channels);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+}
+
+module.exports = { createServer ,getServers,getChannels};
