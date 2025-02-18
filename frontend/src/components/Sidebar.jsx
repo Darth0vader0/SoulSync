@@ -4,24 +4,13 @@ import { useEffect } from "react";
 const Sidebar = ({setActiveChannel}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [serverName, setServerName] = useState("");
-  const [channelName, setChannelName] = useState("");
-  const [voiceChannelName, setVoiceChannelName] = useState("");
+  const [activeServer,setActiveServer] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const [servers, setServers] = useState([])
-  const textChannels = [
-    { id: 1, name: "general", isActive: true ,type: "text"},
-    { id: 2, name: "announcements", isActive: false, type: "text"},
-    { id: 3, name: "off-topic", isActive: false, type: "text"}
-  ];
 
-  const voiceChannels = [
-    { id: 1, name: "General Voice", users: ["Alice", "Bob"], isActive: false ,type:"voice"},
-    { id: 2, name: "Gaming", users: ["Charlie"], isActive: false ,type:"voice"},
-    { id: 3, name: "Music", users: [], isActive: false ,type:"voice"}
-  ];
   
   useEffect(() => {
     const fetchServers = async () => {
@@ -47,40 +36,46 @@ const Sidebar = ({setActiveChannel}) => {
   
   fetchServers();
   }, []);
+// Run only when `servers` update
 
-  useEffect(() => {
-    if (servers.length === 0) return; // Prevent fetching with empty servers
 
-    const fetchChannels = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/getChannels", {
-          method: "POST", // Change to POST since we're sending a body
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            channelIds:servers[0].channels, // Extract all channel IDs
-          }),
-        });
+  const [textChannels, setTextChannels] = useState([]);
+const [voiceChannels, setVoiceChannels] = useState([]);
 
-        if (!response.ok) throw new Error("Failed to fetch data");
 
-        const result = await response.json();
-        console.log("Fetched channels:", result);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
-
-    fetchChannels();
-  }, [servers]); // Run only when `servers` update
- 
 
   const handleChannelClick = (channel) => {
-    setSelectedChannel(channel.id); // Update selected channel UI
+    setSelectedChannel(channel._id); // Update selected channel UI
     setActiveChannel(channel); // Send to ServerPage.jsx
   };
+  const handleActiveServer = async (server)=>{
+    setActiveServer(server);
+    setTextChannels([]);
+    setVoiceChannels([]);
+    try {
+      const response = await fetch(`http://localhost:3001/getChannelsByServer?serverId=${server._id}`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        // Separate channels into text and voice
+        const text = data.channels.filter(channel => channel.type === "text");
+        const voice = data.channels.filter(channel => channel.type === "voice");
+        setTextChannels(text);
+        setVoiceChannels(voice);
+      } else {
+        console.error("Error fetching channels:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching channels:", error);
+    }
+  }
+  useEffect(() => {
+    console.log("Active Server updated:", activeServer);
+  }, [activeServer]);  
 
   const handleCreateServer = async () => {
     if (!serverName) {
@@ -127,10 +122,11 @@ const Sidebar = ({setActiveChannel}) => {
           </div>
           {servers.map((server) => (
             <div
-              key={server.id}
+              key={server._id}
               className="w-12 h-12 rounded-full bg-[#36393f] flex items-center justify-center text-white cursor-pointer hover:rounded-2xl transition-all duration-200"
+              onClick={()=>handleActiveServer(server)}
             >
-              {server.initial}
+              {server.name.slice(0,1)}
             </div>
           ))}
           
@@ -227,16 +223,7 @@ const Sidebar = ({setActiveChannel}) => {
                         <Volume2 size={18} className="mr-2 flex-shrink-0" />
                         <span className="truncate">{channel.name}</span>
                       </a>
-                      {channel.users.length > 0 && (
-                        <div className="ml-9 space-y-1">
-                          {channel.users.map((user, idx) => (
-                            <div key={idx} className="flex items-center text-sm text-[#8e9297]">
-                              <div className="w-2 h-2 rounded-full bg-[#3ba55d] mr-2"></div>
-                              {user}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                    
                     </div>
                   </li>
                 ))}
