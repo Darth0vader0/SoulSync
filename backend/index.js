@@ -11,7 +11,7 @@ const {registerUser, loginUser} = require('./controllers/auth.controller')
 const {sendMessage,getMessages} = require('./controllers/message.controller')
 const serverRoutes = require('./routes/server.routes')
 const authMiddleware = require('./middleware/auth.middleware');
-const { createServer,getServers,getChannelsByServer } = require('./controllers/server.controller');
+const { createServer,getServers,getChannelsByServer,createTextChannel } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
 const Channel = require('./models/channel.model')
 app.use(cookieParse());
@@ -46,4 +46,5 @@ app.post('/send',sendMessage);
 app.post('/createServer', createServer);
 app.get('/getServers',getServers)
 app.get('/getChannelsByServer', getChannelsByServer);
+app.post('/createTextChannel',createTextChannel)
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

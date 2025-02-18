@@ -64,6 +64,29 @@ const createServer = async (req, res) => {
   }
 };
 
+const createTextChannel = async (req,res)=>{
+ 
+
+  try {
+    const channelName = req.body.channelName;
+    if (!channelName) return res.status(400).json({msg: 'Channel name is required'});
+    const serverId = req.query.serverId;
+    const type = 'text';
+    const server = await Server.findById(serverId);
+    if (!server) return res.status(404).json({ error: 'Server not found' });
+
+    const channel = new Channel({
+      name: channelName,
+      type,
+      serverId,
+    });
+    await channel.save();
+    
+  } catch (error) {
+    
+  }
+}
+
 const getServers = async (req,res)=>{
   console.log("into");
   
@@ -108,4 +131,4 @@ const getChannelsByServer = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 }
-module.exports = { createServer ,getServers,getChannelsByServer};
+module.exports = { createServer ,getServers,getChannelsByServer,createTextChannel};

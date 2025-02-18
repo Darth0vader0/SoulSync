@@ -6,6 +6,7 @@ const Sidebar = ({setActiveChannel}) => {
   const [serverName, setServerName] = useState("");
   const [activeServer,setActiveServer] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
+  const[channelName,setChannelName] =useState("");
   const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -26,7 +27,7 @@ const Sidebar = ({setActiveChannel}) => {
         if (!response.ok) throw new Error("Failed to fetch data");
   
         const result = await response.json();
-        console.log("Fetched servers:", result.servers); // ✅ Log here
+        
         setServers(result.servers);
       } catch (err) {
         setError(err.message);
@@ -64,6 +65,8 @@ const [voiceChannels, setVoiceChannels] = useState([]);
         // Separate channels into text and voice
         const text = data.channels.filter(channel => channel.type === "text");
         const voice = data.channels.filter(channel => channel.type === "voice");
+
+        
         setTextChannels(text);
         setVoiceChannels(voice);
       } else {
@@ -74,7 +77,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
     }
   }
   useEffect(() => {
-    console.log("Active Server updated:", activeServer);
+    
   }, [activeServer]);  
 
   const handleCreateServer = async () => {
@@ -98,6 +101,28 @@ const [voiceChannels, setVoiceChannels] = useState([]);
       setError("Failed to create server");
     }
   };
+
+  const handleChannelCreation =async ()=>{
+    if(!channelName){
+      setError("Channel name is required");
+      return;
+    }
+    const response = await fetch(`http://localhost:3001/createTextChannel?serverId=${activeServer._id}`,{
+      method:"POST",
+      credentials:"include",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({channelName:channelName})
+    })
+    if(!response.ok){
+      setError("Failed to create channel");
+      return;
+    }else{
+      document.getElementById("my_modal_2")?.close();
+    }
+    
+  }
 
   return (
     <>
@@ -188,12 +213,13 @@ const [voiceChannels, setVoiceChannels] = useState([]);
                 type="text"
                 placeholder="Enter channel  name"
                 className="input input-bordered w-full bg-[#202225] text-[#dcddde] border-[#040405] focus:border-[#5865F2]"
-                value={serverName}
-                onChange={(e) => setServerName(e.target.value)}
+                value={channelName}
+                onChange={(e) => setChannelName(e.target.value)}
               />
               {error && <p className="text-red-500 text-sm mt-2"></p>}
               <button
                 className="btn bg-[#5865F2] hover:bg-[#4752C4] text-white w-full mt-4"
+                onClick={handleChannelCreation}
               >
                 Create channel
               </button>
@@ -202,7 +228,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
               </h2>
               <ul className="space-y-1">
                 {textChannels.map((channel) => (
-                  <li key={channel.id}>
+                  <li key={channel._id}>
                     <a
                       href={`#${channel.name}`}
                       className={`flex items-center rounded px-2 py-1 ${
@@ -251,7 +277,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
               </h2>
               <ul className="space-y-1">
                 {voiceChannels.map((channel) => (
-                  <li key={channel.id}>
+                  <li key={channel._id}>
                     <div className="space-y-1">
                       <a
                         href={`#${channel.name}`}
