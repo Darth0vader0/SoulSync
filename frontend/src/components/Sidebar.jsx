@@ -178,6 +178,27 @@ const [voiceChannels, setVoiceChannels] = useState([]);
                 <button className="hover:text-[#dcddde]" onClick={() => document.getElementById('my_modal_2')?.showModal()}>
                   <Plus size={16} />
                 </button>
+                <dialog id="my_modal_2" className="modal">
+            <div className="modal-box bg-[#36393f] text-[#dcddde]">
+              <form method="dialog">
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]">✕</button>
+              </form>
+              <h3 className="font-bold text-lg mb-4">Create a channerl</h3>
+              <input
+                type="text"
+                placeholder="Enter channel  name"
+                className="input input-bordered w-full bg-[#202225] text-[#dcddde] border-[#040405] focus:border-[#5865F2]"
+                value={serverName}
+                onChange={(e) => setServerName(e.target.value)}
+              />
+              {error && <p className="text-red-500 text-sm mt-2"></p>}
+              <button
+                className="btn bg-[#5865F2] hover:bg-[#4752C4] text-white w-full mt-4"
+              >
+                Create channel
+              </button>
+            </div>
+          </dialog>
               </h2>
               <ul className="space-y-1">
                 {textChannels.map((channel) => (
@@ -206,6 +227,27 @@ const [voiceChannels, setVoiceChannels] = useState([]);
                 <button className="hover:text-[#dcddde]" onClick={() => document.getElementById('my_modal_1')?.showModal()}>
                   <Plus size={16} />
                 </button>
+                <dialog id="my_modal_1" className="modal">
+            <div className="modal-box bg-[#36393f] text-[#dcddde]">
+              <form method="dialog">
+                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]">✕</button>
+              </form>
+              <h3 className="font-bold text-lg mb-4">Create a voice channel</h3>
+              <input
+                type="text"
+                placeholder="Enter channel name"
+                className="input input-bordered w-full bg-[#202225] text-[#dcddde] border-[#040405] focus:border-[#5865F2]"
+                value={serverName}
+                onChange={(e) => setServerName(e.target.value)}
+              />
+              {error && <p className="text-red-500 text-sm mt-2"></p>}
+              <button
+                className="btn bg-[#5865F2] hover:bg-[#4752C4] text-white w-full mt-4"
+              >
+                Create channel
+              </button>
+            </div>
+          </dialog>
               </h2>
               <ul className="space-y-1">
                 {voiceChannels.map((channel) => (
