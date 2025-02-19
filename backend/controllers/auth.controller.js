@@ -47,7 +47,7 @@ const loginUser = async (req, res) => {
     // Generate JWT Token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
     res.cookie("jwt",token,{
-      maxAge :3600*1000,
+      maxAge :3600*1000*24,
       httpOnly:true,
       sameSite: "Lax",
   });

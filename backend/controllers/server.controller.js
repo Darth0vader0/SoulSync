@@ -31,7 +31,7 @@ const createServer = async (req, res) => {
       ownerId: userId,
       members: [userId], // Owner is automatically a member
     });
-
+    
     await newServer.save();
 
     // Create default channels (e.g., "general" text channel, "General Voice" voice channel)
@@ -53,7 +53,7 @@ const createServer = async (req, res) => {
     // Update server with created channels
     newServer.channels = [generalTextChannel._id, generalVoiceChannel._id];
     await newServer.save();
-
+    
     return res.status(201).json({
       message: 'Server created successfully',
       server: newServer,
@@ -63,30 +63,6 @@ const createServer = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-const createTextChannel = async (req,res)=>{
- 
-
-  try {
-    const channelName = req.body.channelName;
-    if (!channelName) return res.status(400).json({msg: 'Channel name is required'});
-    const serverId = req.query.serverId;
-    const type = 'text';
-    const server = await Server.findById(serverId);
-    if (!server) return res.status(404).json({ error: 'Server not found' });
-
-    const channel = new Channel({
-      name: channelName,
-      type,
-      serverId,
-    });
-    await channel.save();
-    
-  } catch (error) {
-    
-  }
-}
-
 const getServers = async (req,res)=>{
   console.log("into");
   
@@ -106,15 +82,64 @@ const getServers = async (req,res)=>{
     const servers = await Server.find({
         $or: [{ owner: userId }, { members: userId }]
     });
-    console.log(servers);
-    console.log("done");
     
-    res.json({ success: true, servers });
+    res.status(200).json({ success: true, servers });
 } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
 }
   
 }
+
+const createTextChannel = async (req,res)=>{
+  try {
+    const channelName = req.body.channelName;
+    if (!channelName) return res.status(400).json({msg: 'Channel name is required'});
+    const serverId = req.query.serverId;
+    const type = 'text';
+    const server = await Server.findById(serverId);
+    if (!server) return res.status(404).json({ error: 'Server not found' });
+
+    const channel = new Channel({
+      name: channelName,
+      type,
+      serverId,
+    });
+    await channel.save();
+    res.status(200).json({
+      message: 'Channel created successfully',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
+
+const createVoiceChannel = async (req,res)=>{
+    console.log("into createVoiceChannel");
+  try {
+    const voiceChannelName = req.body.voiceChannelName;
+    if (!voiceChannelName) return res.status(400).json({msg: 'Channel name is required'});
+    const serverId = req.query.serverId;
+    const type = 'voice';
+    const server = await Server.findById(serverId);
+    if (!server) return res.status(404).json({ error: 'Server not found' });
+
+    const channel = new Channel({
+      name: voiceChannelName,
+      type,
+      serverId,
+    });
+    await channel.save();
+    res.status(200).json({
+      message: 'Channel created successfully',
+    });
+    
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
 
 const getChannelsByServer = async (req, res) => {
  
@@ -131,4 +156,4 @@ const getChannelsByServer = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 }
-module.exports = { createServer ,getServers,getChannelsByServer,createTextChannel};
+module.exports = { createServer ,getServers,getChannelsByServer,createTextChannel,createVoiceChannel};

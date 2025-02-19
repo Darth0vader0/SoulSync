@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Hash, UserPlus, Bell, Pin, Users, InboxIcon, HelpCircle, PlusCircle, Gift, Sticker, AArrowDown as GIF, Smile as EmojiSmile, Send } from 'lucide-react';
 
-const ChannelUI = ({ channelName = "general  " }) => {
+const ChannelUI = ({ channelName }) => {
   const [message, setMessage] = useState('');
 
   const messages = [
@@ -41,8 +41,8 @@ const ChannelUI = ({ channelName = "general  " }) => {
       {/* Channel Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#202225] bg-[#36393f] shadow-sm">
         <div className="flex items-center space-x-2">
-          <Hash size={24} className="text-[#8e9297]" />
-          <span className="font-bold text-white">{channelName}</span>
+          <Hash size={24} className="text-[#8e9297]" style={{marginLeft : "40px"}}/>
+          <span className="font-bold text-white ">{channelName}</span>
         </div>
         <div className="flex items-center space-x-4 text-[#b9bbbe]">
           

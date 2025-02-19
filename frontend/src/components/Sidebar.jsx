@@ -7,6 +7,7 @@ const Sidebar = ({setActiveChannel}) => {
   const [activeServer,setActiveServer] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const[channelName,setChannelName] =useState("");
+  const[voiceChannelName,setVoiceChannelName] = useState("");
   const [error, setError] = useState("");
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -48,7 +49,9 @@ const [voiceChannels, setVoiceChannels] = useState([]);
   const handleChannelClick = (channel) => {
     setSelectedChannel(channel._id); // Update selected channel UI
     setActiveChannel(channel); // Send to ServerPage.jsx
+    toggleSidebar(); //
   };
+
   const handleActiveServer = async (server)=>{
     setActiveServer(server);
     setTextChannels([]);
@@ -66,9 +69,10 @@ const [voiceChannels, setVoiceChannels] = useState([]);
         const text = data.channels.filter(channel => channel.type === "text");
         const voice = data.channels.filter(channel => channel.type === "voice");
 
-        
+        setActiveChannel(text[0])
         setTextChannels(text);
         setVoiceChannels(voice);
+        toggleSidebar(); //
       } else {
         console.error("Error fetching channels:", data.message);
       }
@@ -118,10 +122,36 @@ const [voiceChannels, setVoiceChannels] = useState([]);
     if(!response.ok){
       setError("Failed to create channel");
       return;
-    }else{
-      document.getElementById("my_modal_2")?.close();
     }
+    console.log("done creating channel");
+      document.getElementById("model2close").click();
+      handleActiveServer(activeServer);
+      setChannelName("");
+  }
+
+  const handleVoiceChannelCreation =async ()=>{
     
+    if(!voiceChannelName){
+      setError("Channel name is required");
+      return;
+    }
+    const response = await fetch(`http://localhost:3001/createVoiceChannel?serverId=${activeServer._id}`,{
+      method:"POST",
+      credentials:"include",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({voiceChannelName:voiceChannelName})
+    })
+    if(!response.ok){
+      setError("Failed to create voice channel");
+      return;
+    }else{
+      document.getElementById("model1close").click();
+      handleActiveServer(activeServer);
+      setVoiceChannelName("")
+    }
+
   }
 
   return (
@@ -166,7 +196,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
           <dialog id="my_modal_3" className="modal">
             <div className="modal-box bg-[#36393f] text-[#dcddde]">
               <form method="dialog">
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]">✕</button>
+                <button id="model3close" className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]">✕</button>
               </form>
               <h3 className="font-bold text-lg mb-4">Create a Server</h3>
               <input
@@ -200,13 +230,13 @@ const [voiceChannels, setVoiceChannels] = useState([]);
             <div>
               <h2 className="flex items-center justify-between text-xs font-semibold uppercase text-[#8e9297] px-2 mb-1">
                 Text Channels
-                <button className="hover:text-[#dcddde]" onClick={() => document.getElementById('my_modal_2')?.showModal()}>
+                <button className="hover:text-[#dcddde]" onClick={() => document.getElementById('my_modal_2')?.showModal() }>
                   <Plus size={16} />
                 </button>
                 <dialog id="my_modal_2" className="modal">
             <div className="modal-box bg-[#36393f] text-[#dcddde]">
               <form method="dialog">
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]">✕</button>
+                <button id="model2close" className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]" onClick={()=>{setChannelName("")}}>✕</button>
               </form>
               <h3 className="font-bold text-lg mb-4">Create a channerl</h3>
               <input
@@ -228,7 +258,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
               </h2>
               <ul className="space-y-1">
                 {textChannels.map((channel) => (
-                  <li key={channel._id}>
+                  <li key={channel._id} > 
                     <a
                       href={`#${channel.name}`}
                       className={`flex items-center rounded px-2 py-1 ${
@@ -256,19 +286,22 @@ const [voiceChannels, setVoiceChannels] = useState([]);
                 <dialog id="my_modal_1" className="modal">
             <div className="modal-box bg-[#36393f] text-[#dcddde]">
               <form method="dialog">
-                <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]">✕</button>
+                <button id='model1close' className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-[#dcddde]" onClick ={()=>{
+                  setVoiceChannelName("")
+                }}>✕</button>
               </form>
               <h3 className="font-bold text-lg mb-4">Create a voice channel</h3>
               <input
                 type="text"
                 placeholder="Enter channel name"
                 className="input input-bordered w-full bg-[#202225] text-[#dcddde] border-[#040405] focus:border-[#5865F2]"
-                value={serverName}
-                onChange={(e) => setServerName(e.target.value)}
+                value={voiceChannelName}
+                onChange={(e) => setVoiceChannelName(e.target.value)}
               />
               {error && <p className="text-red-500 text-sm mt-2"></p>}
               <button
                 className="btn bg-[#5865F2] hover:bg-[#4752C4] text-white w-full mt-4"
+                onClick={handleVoiceChannelCreation}
               >
                 Create channel
               </button>
