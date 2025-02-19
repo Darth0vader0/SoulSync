@@ -1,5 +1,4 @@
-const Message = require("../models/message.model");
-
+const {Message,GcMessages} = require("../models/message.model");
 // Send a message
 const sendMessage = async (req, res) => {
   try {
@@ -18,6 +17,41 @@ const sendMessage = async (req, res) => {
   }
 };
 
+// Get all messages from a channel
+
+const getChannelMessages = async (req, res) => {
+  try {
+    const channelId = req.query.channelId;
+
+    const messages = await GcMessages.find({ channelId }).sort({ timestamp: 1 });
+
+    res.status(200).json({ success: true, data: messages });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
+
+//send message to server channel
+
+const sendMessageToChannel = async (req, res) => {
+  try {
+    const { senderId, channelId, content } = req.body;
+
+    const newMessage = new GcMessages({
+      senderId,
+      channelId,
+      content,
+    });
+
+    await newMessage.save();
+    res.status(201).json({ success: true, message: "Message sent successfully", data: newMessage });
+  } catch (error) {
+    console.log(error.message);
+
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
 // Get messages between two users
 const getMessages = async (req, res) => {
   try {
@@ -36,4 +70,4 @@ const getMessages = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, getMessages };
+module.exports = { sendMessage, getMessages ,sendMessageToChannel,getChannelMessages};

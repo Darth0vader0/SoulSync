@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const MessageSchema = new mongoose.Schema(
   {
@@ -10,5 +11,33 @@ const MessageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const gcMessageSchema = new Schema({
+  channelId: {
+    type: Schema.Types.ObjectId,
+    ref: "Channel", // Links message to a specific channel
+    required: true,
+  },
+  senderId: {
+    type: Schema.Types.ObjectId,
+    ref: "User", // Links message to the sender
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  messageType: {
+    type: String,
+    enum: ["text", "image", "audio", "video"],
+    default: "text",
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const GcMessages = mongoose.model("groupMessages",gcMessageSchema)
+
 const Message = mongoose.model("Message", MessageSchema);
-module.exports = Message;
+module.exports = {Message,GcMessages};

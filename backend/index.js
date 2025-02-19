@@ -8,7 +8,7 @@ const app = express();
 
 const PORT = 3001;
 const {registerUser, loginUser} = require('./controllers/auth.controller')
-const {sendMessage,getMessages} = require('./controllers/message.controller')
+const {sendMessage,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 const serverRoutes = require('./routes/server.routes')
 const authMiddleware = require('./middleware/auth.middleware');
 const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel } = require('./controllers/server.controller');
@@ -41,7 +41,8 @@ app.post('/login', loginUser)
 //messages api
 app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
-
+app.post('/sendMessageToChannel',sendMessageToChannel);
+app.get("/getChannelMessages",getChannelMessages)
 //server routes
 app.post('/createServer', createServer);
 app.get('/getServers',getServers)
