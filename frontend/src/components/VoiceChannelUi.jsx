@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Volume2, UserPlus, Settings, Phone, Video, Monitor, Mic, Headphones, PhoneOff } from 'lucide-react';
 
-const VoiceChannelUI = ({ channelName = "General Voice" }) => {
+const VoiceChannelUI = ({ activeChannel }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -19,7 +19,7 @@ const VoiceChannelUI = ({ channelName = "General Voice" }) => {
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#202225] shadow-sm">
         <div className="flex items-center space-x-2">
           <Volume2 size={24} className="text-[#8e9297]" />
-          <span className="font-bold text-white">{channelName}</span>
+          <span className="font-bold text-white">{activeChannel.name}</span>
         </div>
         <div className="flex items-center space-x-4 text-[#b9bbbe]">
           <button className="hover:text-[#dcddde]">

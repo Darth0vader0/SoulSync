@@ -17,9 +17,9 @@ const ServerPage = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           {activeChannel ? (
             activeChannel.type === "text" ? (
-              <ChannelUI channelName={activeChannel.name} />
+              <ChannelUI activeChannel={activeChannel} />
             ) : (
-              <VoiceChannelUI channelName={activeChannel.name} />
+              <VoiceChannelUI activeChannel={activeChannel} />
             )
           ) : (
             <p className="text-gray-400">Select a channel to start chatting</p>
