@@ -41,7 +41,7 @@ const Sidebar = ({setActiveChannel}) => {
 // Run only when `servers` update
 
 
-  const [textChannels, setTextChannels] = useState([]);
+const [textChannels, setTextChannels] = useState([]);
 const [voiceChannels, setVoiceChannels] = useState([]);
 
 

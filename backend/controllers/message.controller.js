@@ -1,4 +1,6 @@
 const {Message,GcMessages} = require("../models/message.model");
+const jwt =require('jsonwebtoken');
+
 // Send a message
 const sendMessage = async (req, res) => {
   try {
@@ -20,6 +22,7 @@ const sendMessage = async (req, res) => {
 // Get all messages from a channel
 
 const getChannelMessages = async (req, res) => {
+  
   try {
     const channelId = req.query.channelId;
 
@@ -36,10 +39,11 @@ const getChannelMessages = async (req, res) => {
 
 const sendMessageToChannel = async (req, res) => {
   try {
-    const { senderId, channelId, content } = req.body;
+    const { channelId, content } = req.body;
 
+     
     const newMessage = new GcMessages({
-      senderId,
+      senderId: req.user.userId,
       channelId,
       content,
     });

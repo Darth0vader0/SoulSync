@@ -2,31 +2,37 @@ import { useState } from 'react';
 import { Hash, UserPlus, Bell, Pin, Users, InboxIcon, HelpCircle, PlusCircle, Gift, Sticker, AArrowDown as GIF, Smile as EmojiSmile, Send } from 'lucide-react';
 
 const ChannelUI = ({ activeChannel}) => {
-  console.log(activeChannel)
   const [message, setMessage] = useState('');
+  const [messages, setMessages] =useState([]);
 
-  const messages = [
-    {
-      id: 1,
-      author: "Alice",
+
+  const handleSendMessage =async  () => {
+    const response = await fetch('http://localhost:3001/sendMessageToChannel',{
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        content: message,
+        channelId: activeChannel._id,
+      }),
+    })
+    if (!response.ok) {
+      console.error('Failed to send message');
+      return;
+    }
+    setMessage('');
+    const responseData = await response.json();
+    const newMessage = {
+      id: responseData.data.senderId,
+      author: responseData.data.senderId,
       avatar: "A",
-      content: "Hey everyone! Welcome to the channel 👋",
-      timestamp: "Today at 12:00 PM"
-    },
-    {
-      id: 2,
-      author: "Bob",
-      avatar: "B",
-      content: "Hi Alice! Thanks for creating this channel",
-      timestamp: "Today at 12:05 PM"
+      content: responseData.data.content,
     }
-  ];
+    setMessages([...messages, newMessage]);
+    console.log(responseData);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      // Handle sending message
-      setMessage('');
-    }
   };
 
   const handleKeyPress = (e) => {

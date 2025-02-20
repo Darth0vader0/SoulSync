@@ -64,19 +64,9 @@ const createServer = async (req, res) => {
   }
 };
 const getServers = async (req,res)=>{
-  console.log("into");
-  
-  const token = req.cookies.jwt;
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  
-  // Verify token
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  // Assuming JWT token contains user ID
 
   try {
-    const userId = decoded.userId; // Get user ID from token
+    const userId = req.user.userId; // Get user ID from token
 
     // Find servers where the user is an owner or a member
     const servers = await Server.find({
@@ -91,20 +81,26 @@ const getServers = async (req,res)=>{
 }
 
 const createTextChannel = async (req,res)=>{
-  try {
-    const channelName = req.body.channelName;
-    if (!channelName) return res.status(400).json({msg: 'Channel name is required'});
-    const serverId = req.query.serverId;
-    const type = 'text';
-    const server = await Server.findById(serverId);
-    if (!server) return res.status(404).json({ error: 'Server not found' });
+  const channelName = req.body.channelName;
+  const ownerId = req.user.userId;
+  const serverId = req.query.serverId;
 
+
+  try {
+    if (!channelName) return res.status(400).json({msg: 'Channel name is required'});
+    const type = 'text';
+
+    const server = await Server.findById(serverId);
+    if(server.ownerId.toString() !== ownerId) return res.status(400).json({msg : "only owner can access create channel"});
+    if (!server) return res.status(404).json({ error: 'Server not found' });
     const channel = new Channel({
       name: channelName,
       type,
       serverId,
     });
     await channel.save();
+    server.channels.push(channel._id)
+    await server.save();
     res.status(200).json({
       message: 'Channel created successfully',
     });
@@ -115,14 +111,15 @@ const createTextChannel = async (req,res)=>{
 
 
 const createVoiceChannel = async (req,res)=>{
-    console.log("into createVoiceChannel");
+  const ownerId = req.user.userId;
+  const serverId = req.query.serverId;
+  const server = await Server.findById(serverId);
+  if (!server) return res.status(404).json({ error: 'Server not found' });
+  if(server.ownerId.toString()!==ownerId) return res.status(401).json({msg:'you are not allowed to create'})
   try {
     const voiceChannelName = req.body.voiceChannelName;
     if (!voiceChannelName) return res.status(400).json({msg: 'Channel name is required'});
-    const serverId = req.query.serverId;
     const type = 'voice';
-    const server = await Server.findById(serverId);
-    if (!server) return res.status(404).json({ error: 'Server not found' });
 
     const channel = new Channel({
       name: voiceChannelName,
@@ -130,6 +127,8 @@ const createVoiceChannel = async (req,res)=>{
       serverId,
     });
     await channel.save();
+    server.channels.push(channel._id)
+    await server.save();
     res.status(200).json({
       message: 'Channel created successfully',
     });

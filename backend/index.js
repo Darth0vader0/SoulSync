@@ -41,12 +41,13 @@ app.post('/login', loginUser)
 //messages api
 app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
-app.post('/sendMessageToChannel',sendMessageToChannel);
+app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
 app.get("/getChannelMessages",getChannelMessages)
 //server routes
-app.post('/createServer', createServer);
-app.get('/getServers',getServers)
-app.get('/getChannelsByServer', getChannelsByServer);
-app.post('/createTextChannel',createTextChannel)
-app.post('/createVoiceChannel',createVoiceChannel)
+
+app.post('/createServer',authMiddleware, createServer);
+app.get('/getServers',authMiddleware,getServers)
+app.get('/getChannelsByServer',authMiddleware, getChannelsByServer);
+app.post('/createTextChannel',authMiddleware,createTextChannel)
+app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
