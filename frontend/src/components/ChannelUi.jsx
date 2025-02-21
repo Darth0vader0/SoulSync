@@ -24,13 +24,7 @@ const ChannelUI = ({ activeChannel}) => {
     }
     setMessage('');
     const responseData = await response.json();
-    const newMessage = {
-      id: responseData.data.senderId,
-      author: responseData.data.senderId,
-      avatar: "A",
-      content: responseData.data.content,
-    }
-    setMessages([...messages, newMessage]);
+   
     console.log(responseData);
 
   };

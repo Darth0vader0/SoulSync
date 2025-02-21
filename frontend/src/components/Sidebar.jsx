@@ -100,10 +100,16 @@ const [voiceChannels, setVoiceChannels] = useState([]);
       if (!response.ok) throw new Error("Failed to create server");
       const data = await response.json();
       document.getElementById("my_modal_3")?.close();
+      setServers((prevServers) => [...prevServers, data.server]);
+
+      // 🔹 Set the new server as active
+      handleActiveServer(data.server);
+
       setServerName("");
     } catch (err) {
       setError("Failed to create server");
     }
+        // 🔹 Call fetchServers again to update the list
   };
 
   const handleChannelCreation =async ()=>{
