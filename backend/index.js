@@ -2,19 +2,26 @@ const express = require("express");
 const db = require("./config/db");
 const cors = require("cors");
 const dotNet = require("dotenv");
+const http = require("http");
 dotNet.config();
+const Channel = require('./models/channel.model')
 const app = express();
+const server = http.createServer(app);
 
 
 const PORT = 3001;
-const {registerUser, loginUser} = require('./controllers/auth.controller')
+const {registerUser, loginUser,getUserData} = require('./controllers/auth.controller')
 const {sendMessage,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 const serverRoutes = require('./routes/server.routes')
 const authMiddleware = require('./middleware/auth.middleware');
 const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
-const Channel = require('./models/channel.model')
+const setupSocket = require('./config/soket');
 app.use(cookieParse());
+
+// Socket setup
+const io = setupSocket(server)
+
 // Connect to MongoDB
 db();
 app.use(cors({ 
@@ -37,7 +44,7 @@ app.use(limiter);
 // Routes   
 app.post('/signup', registerUser)
 app.post('/login', loginUser)
-
+app.get('/getUserData',authMiddleware,getUserData)
 //messages api
 app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
@@ -50,4 +57,9 @@ app.get('/getServers',authMiddleware,getServers)
 app.get('/getChannelsByServer',authMiddleware, getChannelsByServer);
 app.post('/createTextChannel',authMiddleware,createTextChannel)
 app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.use((req,res,next) => {
+  req.io=io;
+  next();
+})
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

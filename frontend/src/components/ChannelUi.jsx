@@ -1,12 +1,50 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Hash, UserPlus, Bell, Pin, Users, InboxIcon, HelpCircle, PlusCircle, Gift, Sticker, AArrowDown as GIF, Smile as EmojiSmile, Send } from 'lucide-react';
+import io from 'socket.io-client';
+const socket = io('http://localhost:3001',{
+  withCredentials: true,
+  transports: ['websocket','polling'],
 
-const ChannelUI = ({ activeChannel}) => {
+})
+const ChannelUI = ({ activeChannel,activeUser}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] =useState([]);
 
+   // Fetch previous messages on mount
+   useEffect(() => {
+    // const fetchMessages = async () => {
+    //   try {
+    //     const response = await fetch(`http://localhost:3001/getMessages/${activeChannel._id}`);
+    //     const data = await response.json();
+    //     if (data.success) {
+    //       setMessages(data.messages);
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching messages:", error);
+    //   }
+    // };
 
+    if (activeChannel._id) {
+      // fetchMessages();
+      socket.emit("joinChannel", activeChannel._id);
+    }
+
+    // Listen for incoming messages
+    socket.on("receiveMessage", (newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    return () => socket.off("receiveMessage"); // Cleanup
+  }, [activeChannel._id]);
   const handleSendMessage =async  () => {
+    const newMessage = {
+      channelId : activeChannel._id,
+      senderId: activeUser._id,
+      content: message,
+    };
+
+    // Send to Socket.io
+    socket.emit("sendMessage", newMessage);
     const response = await fetch('http://localhost:3001/sendMessageToChannel',{
       method: 'POST',
       credentials: 'include',
