@@ -12,17 +12,21 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
 
    // Fetch previous messages on mount
    useEffect(() => {
-    // const fetchMessages = async () => {
-    //   try {
-    //     const response = await fetch(`http://localhost:3001/getMessages/${activeChannel._id}`);
-    //     const data = await response.json();
-    //     if (data.success) {
-    //       setMessages(data.messages);
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching messages:", error);
-    //   }
-    // };
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/getChannelMessages?channelId=${activeChannel._id}`);
+        const data = await response.json();
+        console.log(data);
+        if (data.success) {
+          setMessages(data.data);
+        }else {
+          console.error(data)
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    fetchMessages(); 
 
     if (activeChannel._id) {
       // fetchMessages();
