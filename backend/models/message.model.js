@@ -16,6 +16,10 @@ const gcMessageSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Channel", // Links message to a specific channel
     required: true,
+  }, 
+  senderUsername: {
+    type: String,
+    required: true, // Ensure every message has the sender's username
   },
   senderId: {
     type: Schema.Types.ObjectId,

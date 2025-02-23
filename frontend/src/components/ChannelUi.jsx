@@ -9,14 +9,13 @@ const socket = io('http://localhost:3001',{
 const ChannelUI = ({ activeChannel,activeUser}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] =useState([]);
-
    // Fetch previous messages on mount
    useEffect(() => {
     const fetchMessages = async () => {
       try {
         const response = await fetch(`http://localhost:3001/getChannelMessages?channelId=${activeChannel._id}`);
         const data = await response.json();
-        console.log(data);
+        
         if (data.success) {
           setMessages(data.data);
         }else {
@@ -44,6 +43,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
     const newMessage = {
       channelId : activeChannel._id,
       senderId: activeUser._id,
+      senderUsername:activeUser.username,
       content: message,
     };
 
@@ -66,8 +66,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
     }
     setMessage('');
     const responseData = await response.json();
-   
-    console.log(responseData);
+  
 
   };
 
@@ -109,13 +108,13 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 bg-[#36393f]">
         {messages.map((msg) => (
-          <div key={msg.id} className="flex items-start space-x-4 group">
+          <div key={msg._id} className="flex items-start space-x-4 group">
             <div className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-white flex-shrink-0">
               {msg.avatar}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2">
-                <span className="font-medium text-white">{msg.author}</span>
+                <span className="font-medium text-white">{msg.senderUsername}</span>
                 <span className="text-xs text-[#8e9297]">{msg.timestamp}</span>
               </div>
               <p className="text-[#dcddde] break-words">{msg.content}</p>

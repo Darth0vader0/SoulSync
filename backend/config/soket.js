@@ -20,10 +20,10 @@ const setupSocket = (server) => {
 
     // Listen for messages and broadcast to the same channel
     socket.on("sendMessage", async (message) => {
-      const { channelId, senderId, content } = message;
+      const { channelId, senderId,senderUsername, content } = message;
 
       // Save message to DB (optional)
-      const newMessage = { senderId, channelId, content, timestamp: new Date() };
+      const newMessage = { senderId, channelId, content, senderUsername, timestamp: new Date() };
       io.to(channelId).emit("receiveMessage", newMessage);
     });
 

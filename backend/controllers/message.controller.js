@@ -44,10 +44,11 @@ const sendMessageToChannel = async (req, res) => {
      
     const newMessage = new GcMessages({
       senderId: req.user.userId,
+      senderUsername: req.user.username,
       channelId,
       content,
     });
-
+    console.log(newMessage);
     await newMessage.save();
     res.status(201).json({ success: true, message: "Message sent successfully", data: newMessage });
   } catch (error) {
