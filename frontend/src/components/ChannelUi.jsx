@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState,useEffect ,useRef} from 'react';
 import { Hash, UserPlus, Bell, Pin, Users, InboxIcon, HelpCircle, PlusCircle, Gift, Sticker, AArrowDown as GIF, Smile as EmojiSmile, Send } from 'lucide-react';
 import io from 'socket.io-client';
 const socket = io('http://localhost:3001',{
@@ -9,6 +9,13 @@ const socket = io('http://localhost:3001',{
 const ChannelUI = ({ activeChannel,activeUser}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] =useState([]);
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
    // Fetch previous messages on mount
    useEffect(() => {
     const fetchMessages = async () => {
@@ -121,6 +128,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
             </div>
           </div>
         ))}
+      <div style={{ visibility: "hidden", height: "0px" }} ref={messagesEndRef} />
       </div>
 
       {/* Message Input */}
