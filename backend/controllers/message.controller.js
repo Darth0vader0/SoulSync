@@ -48,7 +48,6 @@ const sendMessageToChannel = async (req, res) => {
       channelId,
       content,
     });
-    console.log(newMessage);
     await newMessage.save();
     res.status(201).json({ success: true, message: "Message sent successfully", data: newMessage });
   } catch (error) {

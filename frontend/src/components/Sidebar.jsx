@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X, Hash, Plus, Settings, Mic, Headphones, MessageSquare, Volume2 } from "lucide-react";
 import { useEffect } from "react";
-const Sidebar = ({setActiveChannel}) => {
+const Sidebar = ({setActiveChannel,activeUser}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [serverName, setServerName] = useState("");
   const [activeServer,setActiveServer] = useState([]);
@@ -12,7 +12,6 @@ const Sidebar = ({setActiveChannel}) => {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const [servers, setServers] = useState([])
-
   
   useEffect(() => {
     const fetchServers = async () => {
@@ -129,7 +128,6 @@ const [voiceChannels, setVoiceChannels] = useState([]);
       setError("Failed to create channel");
       return;
     }
-    console.log("done creating channel");
       document.getElementById("model2close").click();
       handleActiveServer(activeServer);
       setChannelName("");
@@ -342,10 +340,10 @@ const [voiceChannels, setVoiceChannels] = useState([]);
           <div className="bg-[#292b2f] p-2 flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-8 h-8 rounded-full bg-[#5865f2] flex items-center justify-center text-white mr-2">
-                U
+              {activeUser?activeUser.username.slice(0,1):''}
               </div>
               <div>
-                <div className="text-sm font-medium text-white">Username</div>
+                <div className="text-sm font-medium text-white">{activeUser?activeUser.username:''}</div>
                 <div className="text-xs text-[#b9bbbe]">#1234</div>
               </div>
             </div>

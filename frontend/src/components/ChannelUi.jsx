@@ -41,12 +41,15 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
 
     // Listen for incoming messages
     socket.on("receiveMessage", (newMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      if(newMessage.channelId === activeChannel._id) { setMessages((prevMessages) => [...prevMessages, newMessage]);}
+     
     });
 
     return () => socket.off("receiveMessage"); // Cleanup
   }, [activeChannel._id]);
   const handleSendMessage =async  () => {
+    if (!message) return;
+    // Create new message object
     const newMessage = {
       channelId : activeChannel._id,
       senderId: activeUser._id,
@@ -73,8 +76,6 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
     }
     setMessage('');
     const responseData = await response.json();
-  
-
   };
 
   const handleKeyPress = (e) => {
@@ -128,7 +129,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
             </div>
           </div>
         ))}
-      <div style={{ visibility: "hidden", height: "0px" }} ref={messagesEndRef} />
+      <div style={{ visibility: "hidden", height: "0px",opacity:'none',marginTop:'0px'}} ref={messagesEndRef} />
       </div>
 
       {/* Message Input */}

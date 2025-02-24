@@ -32,7 +32,7 @@ const ServerPage = () => {
     <>
       <div className="flex h-screen">
         {/* Sidebar manages channels and updates the active one */}
-        <Sidebar setActiveChannel={setActiveChannel} />
+        <Sidebar setActiveChannel={setActiveChannel} activeUser={user}  />
 
         {/* Main Content - Switches between Text & Voice UI */}
         <div className="flex-1 flex flex-col overflow-hidden">

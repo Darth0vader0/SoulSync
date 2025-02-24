@@ -10,12 +10,10 @@ const setupSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
 
     // Join channel room
     socket.on("joinChannel", (channelId) => {
       socket.join(channelId);
-      console.log(`User joined channel: ${channelId}`);
     });
 
     // Listen for messages and broadcast to the same channel
@@ -27,10 +25,6 @@ const setupSocket = (server) => {
       io.to(channelId).emit("receiveMessage", newMessage);
     });
 
-    // Handle disconnection
-    socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
-    });
   });
 
   return io;
