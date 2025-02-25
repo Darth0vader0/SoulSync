@@ -1,6 +1,7 @@
 import { useState,useEffect ,useRef} from 'react';
 import { Hash, UserPlus, Bell, Pin, Users, InboxIcon, HelpCircle, PlusCircle, Gift, Sticker, AArrowDown as GIF, Smile as EmojiSmile, Send } from 'lucide-react';
 import io from 'socket.io-client';
+import UserProfilePopup from './UserProfilePopup'
 const socket = io('http://localhost:3001',{
   withCredentials: true,
   transports: ['websocket','polling'],
@@ -10,6 +11,8 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] =useState([]);
   const messagesEndRef = useRef(null);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -84,7 +87,11 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
       handleSendMessage();
     }
   };
-  
+  const handleAvatarClick = (event, user) => {
+    const rect = event.target.getBoundingClientRect();
+    setPopupPosition({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+    setSelectedUser(user);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -117,7 +124,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 bg-[#36393f]">
         {messages.map((msg) => (
           <div key={msg._id} className="flex items-start space-x-4 group">
-            <div className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-white flex-shrink-0">
+            <div className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-white flex-shrink-0"  onClick={(e) => handleAvatarClick(e, msg)}>
               {msg.avatar}
             </div>
             <div className="flex-1 min-w-0">
@@ -157,6 +164,14 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
             </button>
           </div>
         </div>
+         {/* User Profile Popup */}
+      {selectedUser && (
+        <UserProfilePopup
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          position={popupPosition}
+        />
+      )}
       </div>
     </div>
   );
