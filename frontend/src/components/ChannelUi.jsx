@@ -87,10 +87,10 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
       handleSendMessage();
     }
   };
-  const handleAvatarClick = (event, user) => {
+  const handleAvatarClick = (event, userId) => {
     const rect = event.target.getBoundingClientRect();
     setPopupPosition({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
-    setSelectedUser(user);
+    setSelectedUser(userId);
   };
 
   return (
@@ -124,7 +124,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 bg-[#36393f]">
         {messages.map((msg) => (
           <div key={msg._id} className="flex items-start space-x-4 group">
-            <div className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-white flex-shrink-0"  onClick={(e) => handleAvatarClick(e, msg)}>
+            <div className="w-10 h-10 rounded-full bg-[#5865f2] flex items-center justify-center text-white flex-shrink-0"  onClick={(e) => handleAvatarClick(e, msg.senderId)}>
               {msg.avatar}
             </div>
             <div className="flex-1 min-w-0">
@@ -167,7 +167,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
          {/* User Profile Popup */}
       {selectedUser && (
         <UserProfilePopup
-          user={selectedUser}
+          userId={selectedUser}
           onClose={() => setSelectedUser(null)}
           position={popupPosition}
         />

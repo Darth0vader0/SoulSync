@@ -7,7 +7,7 @@ dotNet.config();
 const Channel = require('./models/channel.model')
 const app = express();
 const server = http.createServer(app);
-
+const User = require('./models/User.model');
 
 const PORT = 3001;
 const {registerUser, loginUser,getUserData} = require('./controllers/auth.controller')
@@ -57,6 +57,15 @@ app.get('/getServers',authMiddleware,getServers)
 app.get('/getChannelsByServer',authMiddleware, getChannelsByServer);
 app.post('/createTextChannel',authMiddleware,createTextChannel)
 app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
+app.get("/getUser", async (req, res) => {
+  try {
+    const user = await User.findById(req.query.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 app.use((req,res,next) => {
   req.io=io;
