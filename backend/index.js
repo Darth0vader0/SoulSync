@@ -17,16 +17,17 @@ const authMiddleware = require('./middleware/auth.middleware');
 const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
 const setupSocket = require('./config/soket');
+const setupVoiceSocket = require('./config/voiceSocket');
 app.use(cookieParse());
 
 // Socket setup
 const io = setupSocket(server)
-
+const voiceIo = voiceSocket(server);
 // Connect to MongoDB
 db();
 app.use(cors({ 
 
-  origin: "http://localhost:5173", // Frontend URL
+  origin: ["http://localhost:5173","http://192.168.242.210:5173/"], // Frontend URL
   credentials: true, // Required for cookies
   
  }));
@@ -50,6 +51,7 @@ app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
 app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
 app.get("/getChannelMessages",getChannelMessages)
+
 //server routes
 
 app.post('/createServer',authMiddleware, createServer);
@@ -71,4 +73,4 @@ app.use((req,res,next) => {
   req.io=io;
   next();
 })
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT,() => console.log(`Server running on port ${PORT}`));
