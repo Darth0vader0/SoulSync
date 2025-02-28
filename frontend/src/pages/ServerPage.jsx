@@ -40,7 +40,7 @@ const ServerPage = () => {
             activeChannel.type === "text" ? (
               <ChannelUI activeChannel={activeChannel} activeUser={user}  />
             ) : (
-              <VoiceChannelUI activeChannel={activeChannel} />
+              <VoiceChannelUI activeChannel={activeChannel} userId={user}/>
             )
           ) : (
             <p className="text-gray-400">Select a channel to start chatting</p>
