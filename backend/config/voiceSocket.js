@@ -1,16 +1,6 @@
-const { Server } = require("socket.io");
-
-const setupVoiceSocket = (server) => {
-  const io = new Server(server, {
-    cors: {
-      origin: ["http://localhost:5173", "http://192.168.242.210:5173"], // Adjust based on deployment
-      methods: ["GET", "POST"],
-      credentials: true
-    }
-  });
-
-  io.on("connection", (socket) => {
-    console.log("User connected to voice channel:", socket.id);
+const setupVoiceSocket = (io) => {
+  io.of("/voice").on("connection", (socket) => {
+    console.log("🔊 User connected to voice channel:", socket.id);
 
     // Joining a voice channel
     socket.on("joinVoiceChannel", (channelId) => {
@@ -45,11 +35,9 @@ const setupVoiceSocket = (server) => {
 
     // Disconnecting
     socket.on("disconnect", () => {
-      console.log(`User ${socket.id} disconnected`);
+      console.log(`❌ User ${socket.id} disconnected`);
     });
   });
-
-  return io;
 };
 
 module.exports = setupVoiceSocket;
