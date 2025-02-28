@@ -1,27 +1,27 @@
 const setupVoiceSocket = (io) => {
-  io.of("/voice").on("connection", (socket) => {
-    console.log("🔊 User connected to voice channel:", socket.id);
+  io.on("connection", (socket) => {
+    console.log(`🔊 User connected for voice: ${socket.id}`);
 
-    // Joining a voice channel
+    // Join voice channel
     socket.on("joinVoiceChannel", (channelId) => {
       socket.join(channelId);
       console.log(`User ${socket.id} joined voice channel ${channelId}`);
       socket.to(channelId).emit("userJoined", { userId: socket.id });
     });
 
-    // Handling WebRTC offers
+    // Handle WebRTC offers
     socket.on("offer", (data) => {
       const { channelId, offer, sender } = data;
       socket.to(channelId).emit("offer", { offer, sender });
     });
 
-    // Handling WebRTC answers
+    // Handle WebRTC answers
     socket.on("answer", (data) => {
       const { channelId, answer, sender } = data;
       socket.to(channelId).emit("answer", { answer, sender });
     });
 
-    // Handling ICE candidates
+    // Handle ICE candidates
     socket.on("iceCandidate", (data) => {
       const { channelId, candidate, sender } = data;
       socket.to(channelId).emit("iceCandidate", { candidate, sender });
@@ -35,7 +35,7 @@ const setupVoiceSocket = (io) => {
 
     // Disconnecting
     socket.on("disconnect", () => {
-      console.log(`❌ User ${socket.id} disconnected`);
+      console.log(`❌ Voice user ${socket.id} disconnected`);
     });
   });
 };
