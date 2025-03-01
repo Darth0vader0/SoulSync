@@ -13,28 +13,26 @@ const VoiceChannelUI = ({ activeChannel, userId }) => {
 
   useEffect(() => {
     if (!activeChannel || !userId) return;
+  
+    socket.emit("joinVoiceChannel", activeChannel._id, userId );
 
-    // Join voice channel
-    socket.emit("joinVoiceChannel", activeChannel.id);
+    // 🔹 Listen for full user list
+    socket.on("userList", (Users) => {
+      console.log("Updated user list:", Users);
 
-    // Listen for new users joining
-    socket.on("userJoined", ({ userId }) => {
-      setConnectedUsers((prevUsers) => [...prevUsers, { id: userId, name: `User ${userId}` }]);
-    });
-
-    // Listen for users leaving
-    socket.on("userLeft", ({ userId }) => {
-      setConnectedUsers((prevUsers) => prevUsers.filter(user => user.id !== userId));
+      // 🔹 Only update if the user is in the active channel
+      if (activeChannel._id) {
+        setConnectedUsers(Users);
+      }
     });
 
     return () => {
-      // Leave the voice channel when component unmounts
-      socket.emit("leaveVoiceChannel", activeChannel.id);
-      socket.off("userJoined");
-      socket.off("userLeft");
+      socket.emit("leaveVoiceChannel", { channelId: activeChannel._id, userId });
+
+      socket.off("userList");
     };
   }, [activeChannel, userId]);
-
+  
   return (
     <div className="flex flex-col h-full bg-[#36393f]">
       {/* Voice Channel Header */}
@@ -56,13 +54,13 @@ const VoiceChannelUI = ({ activeChannel, userId }) => {
             <div key={user.id} className="bg-[#2f3136] p-4 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white bg-[#5865f2]`}>
-                  {user.name[0]}
+                  {user.username.slice(0,1)}
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-white">{user.name}</div>
+                  <div className="font-medium text-white">{user.username}</div>
                   <div className="flex items-center space-x-2 text-sm text-[#b9bbbe]">
-                    {user.isMuted && <Mic className="w-4 h-4 text-red-500" />}
-                    {user.isVideoOn && <Video className="w-4 h-4 text-[#3ba55d]" />}
+                    {/* {user.isMuted && <Mic className="w-4 h-4 text-red-500" />}
+                    {user.isVideoOn && <Video className="w-4 h-4 text-[#3ba55d]" />} */}
                   </div>
                 </div>
               </div>

@@ -7,7 +7,6 @@ import VoiceChannelUI from "../components/VoiceChannelUi";
 const ServerPage = () => {
   const [activeChannel, setActiveChannel] = useState(null); // Track selected channel
   const [user, setUser] = useState(null);
-  console.log(activeChannel);
   
   useEffect(() => {
     const fetchUserData = async () => {
