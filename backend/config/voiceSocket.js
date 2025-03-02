@@ -29,6 +29,21 @@ const setupVoiceSocket = (io) => {
       // 🔹 Emit updated user list to all clients in channel
       io.to(channelId).emit("userList", usersInChannels[channelId]);
     });
+
+    //handle leave user list
+      // 🔹 User leaves voice channel
+      socket.on("leaveVoiceChannel",  (channelId, user ) => {
+        console.log(`User ${user.username} leaving channel ${channelId}`);
+        socket.leave(channelId);
+  
+        if (usersInChannels[channelId]) {
+          usersInChannels[channelId] = usersInChannels[channelId].filter(u => u.id !== user._id);
+        }
+  
+        // Emit updated user list
+        io.to(channelId).emit("userList", usersInChannels[channelId]);
+      });
+  
     // Handle WebRTC offers
     socket.on("offer", (data) => {
       const { channelId, offer, sender } = data;

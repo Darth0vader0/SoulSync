@@ -27,12 +27,20 @@ const VoiceChannelUI = ({ activeChannel, userId }) => {
     });
 
     return () => {
-      socket.emit("leaveVoiceChannel", { channelId: activeChannel._id, userId });
+      socket.emit("leaveVoiceChannel", activeChannel._id, userId );
 
       socket.off("userList");
     };
   }, [activeChannel, userId]);
   
+  const handleLeaveChannel=()=>{
+    // Leave the voice channel when the user clicks the leave channel button
+    socket.emit("leaveVoiceChannel",  activeChannel._id, userId );
+    setConnectedUsers((prevUsers) => prevUsers.filter(u => u.id !== userId._id));
+    console.log("User left the channel",connectedUsers );
+  }
+
+
   return (
     <div className="flex flex-col h-full bg-[#36393f]">
       {/* Voice Channel Header */}
@@ -86,7 +94,7 @@ const VoiceChannelUI = ({ activeChannel, userId }) => {
               <Monitor size={20} className="text-white" />
             </button>
           </div>
-          <button className="p-2 rounded-lg bg-red-500 hover:bg-red-600" onClick={() => socket.emit("leaveVoiceChannel", activeChannel.id)}>
+          <button className="p-2 rounded-lg bg-red-500 hover:bg-red-600" onClick={() => handleLeaveChannel()}>
             <PhoneOff size={20} className="text-white" />
           </button>
         </div>
