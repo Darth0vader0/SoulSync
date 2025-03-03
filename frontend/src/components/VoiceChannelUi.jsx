@@ -4,13 +4,13 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3001"); // Update with backend URL
 
-const VoiceChannelUI = ({ activeChannel, userId }) => {
+const VoiceChannelUI = ({ activeChannel, userId,setActiveChannel,activerServerData }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
   const [connectedUsers, setConnectedUsers] = useState([]); // Dynamic user list
-
+  
   useEffect(() => {
     if (!activeChannel || !userId) return;
   
@@ -18,17 +18,15 @@ const VoiceChannelUI = ({ activeChannel, userId }) => {
 
     // 🔹 Listen for full user list
     socket.on("userList", (Users) => {
-      console.log("Updated user list:", Users);
-
       // 🔹 Only update if the user is in the active channel
-      if (activeChannel._id) {
-        setConnectedUsers(Users);
-      }
+      console.log(Users)
+      
+      setConnectedUsers(Users.filter(u => u.joinChannel === activeChannel._id));
     });
+
 
     return () => {
       socket.emit("leaveVoiceChannel", activeChannel._id, userId );
-
       socket.off("userList");
     };
   }, [activeChannel, userId]);
@@ -36,8 +34,9 @@ const VoiceChannelUI = ({ activeChannel, userId }) => {
   const handleLeaveChannel=()=>{
     // Leave the voice channel when the user clicks the leave channel button
     socket.emit("leaveVoiceChannel",  activeChannel._id, userId );
-    setConnectedUsers((prevUsers) => prevUsers.filter(u => u.id !== userId._id));
-    console.log("User left the channel",connectedUsers );
+    console.log(activerServerData)
+    setActiveChannel(null)
+
   }
 
 
@@ -94,7 +93,7 @@ const VoiceChannelUI = ({ activeChannel, userId }) => {
               <Monitor size={20} className="text-white" />
             </button>
           </div>
-          <button className="p-2 rounded-lg bg-red-500 hover:bg-red-600" onClick={() => handleLeaveChannel()}>
+          <button className="p-2 rounded-lg bg-red-500 hover:bg-red-600" onClick={handleLeaveChannel}>
             <PhoneOff size={20} className="text-white" />
           </button>
         </div>

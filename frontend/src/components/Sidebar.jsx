@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X, Hash, Plus, Settings, Mic, Headphones, MessageSquare, Volume2 } from "lucide-react";
 import { useEffect } from "react";
-const Sidebar = ({setActiveChannel,activeUser}) => {
+const Sidebar = ({setActiveChannel,activeUser,setActiveServerData}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [serverName, setServerName] = useState("");
   const [activeServer,setActiveServer] = useState([]);
@@ -53,6 +53,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
 
   const handleActiveServer = async (server)=>{
     setActiveServer(server);
+    setActiveServerData(server);
     setTextChannels([]);
     setVoiceChannels([]);
     try {

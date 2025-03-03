@@ -3,11 +3,11 @@ import Layout from "../components/Layout";
 import Sidebar from "../components/Sidebar";
 import ChannelUI from "../components/ChannelUi";
 import VoiceChannelUI from "../components/VoiceChannelUi";
-
+import image from "../assets/image-removebg-preview.png";
 const ServerPage = () => {
   const [activeChannel, setActiveChannel] = useState(null); // Track selected channel
   const [user, setUser] = useState(null);
-  
+   const [activerServerData,setActiveServerData] = useState([])
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -33,7 +33,7 @@ const ServerPage = () => {
     <>
       <div className="flex h-screen">
         {/* Sidebar manages channels and updates the active one */}
-        <Sidebar setActiveChannel={setActiveChannel} activeUser={user}  />
+        <Sidebar setActiveChannel={setActiveChannel} setActiveServerData={setActiveServerData} activeUser={user}  />
 
         {/* Main Content - Switches between Text & Voice UI */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -41,10 +41,18 @@ const ServerPage = () => {
             activeChannel.type === "text" ? (
               <ChannelUI activeChannel={activeChannel} activeUser={user}  />
             ) : (
-              <VoiceChannelUI activeChannel={activeChannel} userId={user}/>
+              <VoiceChannelUI activeChannel={activeChannel} setActiveChannel={setActiveChannel}  activerServerData={activerServerData} userId={user} />
             )
           ) : (
-            <p className="text-gray-400">Select a channel to start chatting</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+            <div className="mb-5">
+             <img src={image} alt="" className="w-full h-auto"  />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">select a channel to keep communicate</h2>
+            <p className="text-center mb-6 max-w-md">
+              No text or voice channels are currently selected. Choose a channel from the sidebar or start a conversation.
+            </p>
+          </div>
           )}
         </div>
       </div>

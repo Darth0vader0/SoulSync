@@ -34,14 +34,17 @@ const setupVoiceSocket = (io) => {
       // 🔹 User leaves voice channel
       socket.on("leaveVoiceChannel",  (channelId, user ) => {
         console.log(`User ${user.username} leaving channel ${channelId}`);
-        socket.leave(channelId);
-  
-        if (usersInChannels[channelId]) {
-          usersInChannels[channelId] = usersInChannels[channelId].filter(u => u.id !== user._id);
-        }
-  
-        // Emit updated user list
-        io.to(channelId).emit("userList", usersInChannels[channelId]);
+
+      // ✅ Remove user from backend list
+      if (usersInChannels[channelId]) {
+        usersInChannels[channelId] = usersInChannels[channelId].filter(u => u.id !== user._id);
+      }
+
+      console.log(`Updated users in ${channelId}:`, usersInChannels[channelId]);
+
+      // ✅ Emit the updated user list to **all users in the channel**
+      io.to(channelId).emit("userList", usersInChannels[channelId]);
+      socket.leave(channelId);
       });
   
     // Handle WebRTC offers
