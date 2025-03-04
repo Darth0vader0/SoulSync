@@ -97,14 +97,20 @@ const VoiceChannelUI = ({ activeChannel, userId,setActiveChannel,activerServerDa
     peerRefs.current[peerId] = peer;
   };
   const toggleMute = () => {
-    if (stream) {
-      stream.getAudioTracks().forEach(track => {
-        track.enabled = !isMuted; // Toggle mute/unmute
-      });
+    setIsMuted((prevMuted) => {
+      const newMutedState = !prevMuted;
   
-      setIsMuted(!isMuted);
-      socket.emit("toggleMute", { userId, isMuted: !isMuted, channelId: activeChannel._id });
-    }
+      if (stream) {
+        stream.getAudioTracks().forEach(track => {
+          track.enabled = !newMutedState; // Disable audio if muted
+        });
+      }
+  
+      // Emit mute state to other users
+      socket.emit("toggleMute", { userId, isMuted: newMutedState, channelId: activeChannel._id });
+  
+      return newMutedState;
+    });
   };
   useEffect(() => {
     socket.on("userMuted", ({ userId, isMuted }) => {

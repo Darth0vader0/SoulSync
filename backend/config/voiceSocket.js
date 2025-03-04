@@ -66,7 +66,7 @@ const setupVoiceSocket = (io) => {
     });
     //mute unmute
     socket.on("toggleMute", ({ userId, isMuted, channelId }) => {
-      console.log(`🔇 User ${userId} ${isMuted ? "muted" : "unmuted"}`);
+      console.log(`🔇 User ${userId.username} ${isMuted ? "muted" : "unmuted"}`);
       
       // Update the user's mute state in the server list
       if (usersInChannels[channelId]) {
