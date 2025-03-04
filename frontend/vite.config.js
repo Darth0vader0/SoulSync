@@ -1,7 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-})
+  define: {
+    global: 'window', // Ensures 'global' is defined
+    'process.env': {}, // Fix process-related issues
+  },
+  resolve: {
+    alias: {
+      buffer: 'buffer/', // Ensure Buffer is polyfilled
+      process: 'process/browser', // Polyfill process for browser use
+    },
+  },
+});
