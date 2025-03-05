@@ -39,7 +39,7 @@ setupVoiceSocket(io);  // Voice Channels
 db();
 app.use(cors({ 
 
-  origin: ["http://localhost:5173","http://192.168.242.210:5173/"], // Frontend URL
+  origin: ["http://localhost:5173","http://192.168.242.210:5173"], // Frontend URL
   credentials: true, // Required for cookies
   
  }));
