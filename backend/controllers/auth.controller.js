@@ -48,11 +48,14 @@ const loginUser = async (req, res) => {
 
     // Generate JWT Token
     const token = jwt.sign({ userId: user._id,username:user.username }, process.env.JWT_SECRET);
+    console.log(token)
     res.cookie("jwt",token,{
       maxAge :3600*1000*24,
       httpOnly:true,
-      sameSite: "Lax",
+      sameSite: "none",
+      secure : true
   });
+
 
     res.status(200).json({ message: "Login successful" });
   } catch (error) {
