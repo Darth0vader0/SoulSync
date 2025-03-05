@@ -18,7 +18,7 @@ const UserProfilePopup = ({ userId, onClose, position }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/getUser?userId=${userId}`);
+        const response = await fetch(`https://soulsync-52q9.onrender.com/getUser?userId=${userId}`);
         if (!response.ok) throw new Error("Failed to fetch user data");
 
         const data = await response.json();

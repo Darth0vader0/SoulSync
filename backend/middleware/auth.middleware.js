@@ -4,8 +4,9 @@ const authMiddleware = (req, res, next) => {
   // Log cookies to check if JWT is present
   // Get token from cookies
   const token = req.cookies.jwt;
-
+  console.log(token)
   if (!token) {
+    
     return res.status(401).json({ message: "No token, authorization denied" });
   }
 

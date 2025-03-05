@@ -10,7 +10,7 @@ import { useEffect, useState,useRef } from 'react';
 import { Volume2, UserPlus, Settings, PhoneOff, Mic, Video, Monitor, Headphones } from 'lucide-react';
 import { io } from "socket.io-client";
 import SimplePeer from "simple-peer";
-const socket = io("http://localhost:3001"); // Update with backend URL
+const socket = io("https://soulsync-52q9.onrender.com"); // Update with backend URL
 
 const VoiceChannelUI = ({ activeChannel, userId,setActiveChannel,activerServerData }) => {
   const [isMuted, setIsMuted] = useState(false);

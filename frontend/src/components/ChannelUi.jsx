@@ -2,7 +2,7 @@ import { useState,useEffect ,useRef} from 'react';
 import { Hash, UserPlus, Bell, Pin, Users, InboxIcon, HelpCircle, PlusCircle, Gift, Sticker, AArrowDown as GIF, Smile as EmojiSmile, Send } from 'lucide-react';
 import io from 'socket.io-client';
 import UserProfilePopup from './UserProfilePopup'
-const socket = io('http://localhost:3001',{
+const socket = io('https://soulsync-52q9.onrender.com',{
   withCredentials: true,
   transports: ['websocket','polling'],
 
@@ -23,7 +23,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
    useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/getChannelMessages?channelId=${activeChannel._id}`);
+        const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelMessages?channelId=${activeChannel._id}`);
         const data = await response.json();
         
         if (data.success) {
@@ -62,7 +62,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
 
     // Send to Socket.io
     socket.emit("sendMessage", newMessage);
-    const response = await fetch('http://localhost:3001/sendMessageToChannel',{
+    const response = await fetch('https://soulsync-52q9.onrender.com/sendMessageToChannel',{
       method: 'POST',
       credentials: 'include',
       headers: {

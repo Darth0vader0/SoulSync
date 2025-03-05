@@ -8,10 +8,11 @@ const ServerPage = () => {
   const [activeChannel, setActiveChannel] = useState(null); // Track selected channel
   const [user, setUser] = useState(null);
    const [activerServerData,setActiveServerData] = useState([])
+   const [error, setError] = useState(null);
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:3001/getUserData", {
+        const response = await fetch("https://soulsync-52q9.onrender.com/getUserData", {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

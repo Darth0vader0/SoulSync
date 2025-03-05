@@ -16,7 +16,7 @@ const Sidebar = ({setActiveChannel,activeUser,setActiveServerData}) => {
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        const response = await fetch("http://localhost:3001/getServers", {
+        const response = await fetch("https://soulsync-52q9.onrender.com/getServers", {
           method: "GET",
           credentials: "include",
           headers: {
@@ -57,7 +57,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
     setTextChannels([]);
     setVoiceChannels([]);
     try {
-      const response = await fetch(`http://localhost:3001/getChannelsByServer?serverId=${server._id}`, {
+      const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelsByServer?serverId=${server._id}`, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -90,7 +90,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
       return;
     }
     try {
-      const response = await fetch("http://localhost:3001/createServer", {
+      const response = await fetch("https://soulsync-52q9.onrender.com/createServer", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -117,7 +117,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
       setError("Channel name is required");
       return;
     }
-    const response = await fetch(`http://localhost:3001/createTextChannel?serverId=${activeServer._id}`,{
+    const response = await fetch(`https://soulsync-52q9.onrender.com/createTextChannel?serverId=${activeServer._id}`,{
       method:"POST",
       credentials:"include",
       headers:{
@@ -140,7 +140,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
       setError("Channel name is required");
       return;
     }
-    const response = await fetch(`http://localhost:3001/createVoiceChannel?serverId=${activeServer._id}`,{
+    const response = await fetch(`https://soulsync-52q9.onrender.com/createVoiceChannel?serverId=${activeServer._id}`,{
       method:"POST",
       credentials:"include",
       headers:{

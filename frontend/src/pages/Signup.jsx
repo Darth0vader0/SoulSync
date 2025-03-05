@@ -16,7 +16,7 @@ export const Signup = () => {
     e.preventDefault();
     // Handle signup logic here
     try {
-      const response = await fetch("http://localhost:3001/signup", {
+      const response = await fetch("https://soulsync-52q9.onrender.com/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
