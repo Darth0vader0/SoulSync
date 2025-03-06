@@ -24,7 +24,7 @@ app.use(cookieParse());
 // Socket setup
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://192.168.242.210:5173"],
+    origin: ["http://localhost:5173", "http://192.168.242.210:5173","https://soul-sync-omega.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -39,7 +39,7 @@ setupVoiceSocket(io);  // Voice Channels
 db();
 app.use(cors({ 
 
-  origin: ["http://localhost:5173","http://192.168.242.210:5173"], // Frontend URL
+  origin: ["http://localhost:5173","http://192.168.242.210:5173","https://soul-sync-omega.vercel.app"], // Frontend URL
   credentials: true, // Required for cookies
   
  }));
