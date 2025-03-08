@@ -1,4 +1,4 @@
-import Layout from "../components/main/Layout"
+import Layout from "../components/main/layout"
 import ServerPage from "../components/main/serverPage"
 
 export default function Home() {
