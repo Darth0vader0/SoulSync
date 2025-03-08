@@ -1,5 +1,5 @@
 import "./global.css"; // Ensure global styles are included
-import { CustomThemeProvider } from "../components/themeProvider";
+import { CustomThemeProvider } from "../components/main/ThemeProvider";
 import { SidebarProvider } from "../components/ui/sidebar";
 
 // ✅ Inter font via CDN (Google Fonts)
