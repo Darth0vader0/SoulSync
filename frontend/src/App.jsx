@@ -12,7 +12,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/serverPage" element={<ServerPage />} />
-        <Route path="/chat" element={<RootLayout><Home /></RootLayout>} />
+        <Route path="/mainChat" element={<RootLayout><Home /></RootLayout>} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
