@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import Sidebar from "../components/"
+import Sidebar from "./sidebar"
 import ChatBox from "./chatBox"
 import VoiceChannelUI from "./voiceChannel"
 
