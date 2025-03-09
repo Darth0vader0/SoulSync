@@ -32,52 +32,47 @@ import {
 } from "../ui/sidebar"
 
 // Mock data
-const servers = [
-  {
-    id: "gaming",
-    name: "Gaming Hub",
-    icon: "G",
-    textChannels: [
-      { id: "general", name: "general", type: "text" },
-      { id: "memes", name: "memes", type: "text" },
-      { id: "strategy", name: "strategy", type: "text" }
-    ],
-    voiceChannels: [
-      { id: "lounge", name: "Lounge", type: "voice" },
-      { id: "gaming", name: "Gaming", type: "voice" }
-    ]
-  },
-  {
-    id: "dev",
-    name: "Dev Community",
-    icon: "D",
-    textChannels: [
-      { id: "help", name: "help", type: "text" },
-      { id: "projects", name: "projects", type: "text" }
-    ],
-    voiceChannels: [{ id: "collab", name: "Collaboration", type: "voice" }]
-  },
-  {
-    id: "music",
-    name: "Music Lovers",
-    icon: "M",
-    textChannels: [
-      { id: "recommendations", name: "recommendations", type: "text" },
-      { id: "releases", name: "new-releases", type: "text" }
-    ],
-    voiceChannels: [{ id: "listening", name: "Listening Party", type: "voice" }]
-  }
-]
 
-const onlineUsers = [
-  { id: "1", name: "Jane Smith", avatar: "JS", status: "online" },
-  { id: "2", name: "John Doe", avatar: "JD", status: "idle" },
-  { id: "3", name: "Alex Johnson", avatar: "AJ", status: "dnd" },
-  { id: "4", name: "Sam Wilson", avatar: "SW", status: "online" }
-]
 
-export default function Sidebar({ onChannelSelect, activeChannel }) {
-  const [activeServer, setActiveServer] = useState(servers[0])
+const onlineUsers=
+[
+    { id: "1", username: "John Doe", status: "online" ,avatar :"JD"},
+    { id: "2", username: "Jane Smith", status: "away",avatar:"JS" },
+    { id: "3", username: "Bob Johnson", status: "online",avatar:"BJ" }
+  ]
+
+
+export default function Sidebar({ setActiveChannel, activeChannel,setActiveServerData }) {
+  const [activeServer, setActiveServer] = useState([])
+
+  const [servers,setServers]= useState([])
+
+  useEffect(() => {
+    const fetchServers = async () => {
+      try {
+        const response = await fetch("https://soulsync-52q9.onrender.com/getServers", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (!response.ok) throw new Error("Failed to fetch data");
+  
+        const result = await response.json();
+        console.log((result.server));
+        setServers(result.servers);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+  
+  fetchServers();
+  }, []);
+
+
   const [textChannels, setTextChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
 
@@ -113,37 +108,12 @@ export default function Sidebar({ onChannelSelect, activeChannel }) {
     onChannelSelect(server.textChannels[0])
   }
 
-  const handleChannelClick = channel => {
-    onChannelSelect(channel)
-    console.log(server)
+  const handleChannelClick = (channel) => {
+    setActiveChannel(channel._id)
+    
   }
-  const [server,setServers]= useState([])
-  
-   useEffect(() => {
-      const fetchServers = async () => {
-        try {
-          const response = await fetch("https://soulsync-52q9.onrender.com/getServers", {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-    
-          if (!response.ok) throw new Error("Failed to fetch data");
-    
-          const result = await response.json();
-          console.log((result.server));
-          setServers(result.servers);
-        } catch (err) {
-          setError(err.message);
-        }
-      };
-  
-    
-    fetchServers();
-    }, []);
-    console.log(server)
+ 
+
 
 
   const getStatusColor = status => {
@@ -165,16 +135,16 @@ export default function Sidebar({ onChannelSelect, activeChannel }) {
         <div className="flex h-full">
           {/* Server icons column */}
           <div className="flex w-[72px] flex-col items-center gap-2 overflow-y-auto bg-background p-2 py-4">
-            {server.map(server => (
+            {servers.map(server => (
               <Tooltip key={server._id}>
                 <TooltipTrigger asChild>
                   <button
                     className={`server-icon ${
-                      activeServer.id === server._id ? "active" : ""
+                      activeServer._id === server._id ? "active" : ""
                     }`}
                     onClick={() => handleServerClick(server)}
                   >
-                    {server.id === activeServer.id && (
+                    {server._id === activeServer._id && (
                       <div className="server-icon-indicator"></div>
                     )}
                     {server.name.slice(0,1)}
@@ -218,10 +188,10 @@ export default function Sidebar({ onChannelSelect, activeChannel }) {
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {activeServer.textChannels.map(channel => (
-                    <SidebarMenuItem key={channel.id}>
+                  {textChannels.map(channel => (
+                    <SidebarMenuItem key={channel._id}>
                       <SidebarMenuButton
-                        isActive={activeChannel.id === channel.id}
+                        isActive={activeChannel._id === channel._id}
                         onClick={() => handleChannelClick(channel)}
                       >
                         <Hash className="mr-2 h-4 w-4" />
@@ -240,10 +210,10 @@ export default function Sidebar({ onChannelSelect, activeChannel }) {
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {activeServer.voiceChannels.map(channel => (
-                    <SidebarMenuItem key={channel.id}>
+                  {voiceChannels.map(channel => (
+                    <SidebarMenuItem key={channel._id}>
                       <SidebarMenuButton
-                        isActive={activeChannel.id === channel.id}
+                        isActive={activeChannel._id === channel._id}
                         onClick={() => handleChannelClick(channel)}
                       >
                         <Volume2 className="mr-2 h-4 w-4" />
@@ -280,7 +250,7 @@ export default function Sidebar({ onChannelSelect, activeChannel }) {
                               )}`}
                             ></div>
                           </div>
-                          <span>{user.name}</span>
+                          <span>{user.username}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}

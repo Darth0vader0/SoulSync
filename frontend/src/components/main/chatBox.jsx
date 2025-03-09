@@ -108,7 +108,7 @@ const mockMessages = [
   }
 ]
 
-export default function ChatBox({ channel }) {
+export default function ChatBox({ activeChannel }) {
   const [messages, setMessages] = useState(mockMessages)
   const [newMessage, setNewMessage] = useState("")
   const messagesEndRef = useRef(null)
