@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import {
   Hash,
   Volume2,
@@ -78,16 +78,73 @@ const onlineUsers = [
 
 export default function Sidebar({ onChannelSelect, activeChannel }) {
   const [activeServer, setActiveServer] = useState(servers[0])
+  const [textChannels, setTextChannels] = useState([]);
+  const [voiceChannels, setVoiceChannels] = useState([]);
 
-  const handleServerClick = server => {
+  const handleServerClick =async (server) => {
     setActiveServer(server)
+    setTextChannels([]);
+    setVoiceChannels([]);
+    try {
+      const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelsByServer?serverId=${server._id}`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        // Separate channels into text and voice
+        const text = data.channels.filter(channel => channel.type === "text");
+        const voice = data.channels.filter(channel => channel.type === "voice");
+
+        setTextChannels(text);
+        setVoiceChannels(voice);
+        console.log("textChannels",textChannels)
+        console.log("voiceChannels",voiceChannels)
+  
+      } else {
+        console.error("Error fetching channels:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching channels:", error);
+    }
     // Set the first text channel as active when switching servers
     onChannelSelect(server.textChannels[0])
   }
 
   const handleChannelClick = channel => {
     onChannelSelect(channel)
+    console.log(server)
   }
+  const [server,setServers]= useState([])
+  
+   useEffect(() => {
+      const fetchServers = async () => {
+        try {
+          const response = await fetch("https://soulsync-52q9.onrender.com/getServers", {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+    
+          if (!response.ok) throw new Error("Failed to fetch data");
+    
+          const result = await response.json();
+          console.log((result.server));
+          setServers(result.servers);
+        } catch (err) {
+          setError(err.message);
+        }
+      };
+  
+    
+    fetchServers();
+    }, []);
+    console.log(server)
+
 
   const getStatusColor = status => {
     switch (status) {
@@ -108,19 +165,19 @@ export default function Sidebar({ onChannelSelect, activeChannel }) {
         <div className="flex h-full">
           {/* Server icons column */}
           <div className="flex w-[72px] flex-col items-center gap-2 overflow-y-auto bg-background p-2 py-4">
-            {servers.map(server => (
-              <Tooltip key={server.id}>
+            {server.map(server => (
+              <Tooltip key={server._id}>
                 <TooltipTrigger asChild>
                   <button
                     className={`server-icon ${
-                      activeServer.id === server.id ? "active" : ""
+                      activeServer.id === server._id ? "active" : ""
                     }`}
                     onClick={() => handleServerClick(server)}
                   >
                     {server.id === activeServer.id && (
                       <div className="server-icon-indicator"></div>
                     )}
-                    {server.icon}
+                    {server.name.slice(0,1)}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">{server.name}</TooltipContent>

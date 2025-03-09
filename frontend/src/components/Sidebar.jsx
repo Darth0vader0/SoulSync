@@ -80,6 +80,7 @@ const [voiceChannels, setVoiceChannels] = useState([]);
       console.error("Error fetching channels:", error);
     }
   }
+  
   useEffect(() => {
     
   }, [activeServer]);  
