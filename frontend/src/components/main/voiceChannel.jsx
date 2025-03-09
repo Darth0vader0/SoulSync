@@ -66,7 +66,7 @@ const connectedUsers = [
   }
 ]
 
-export default function VoiceChannelUI({ channel }) {
+export default function VoiceChannelUI({ activeChannel,activerServerData,setActiveChannel, userId }) {
   const [isMuted, setIsMuted] = useState(false)
   const [isDeafened, setIsDeafened] = useState(false)
   const [hasVideo, setHasVideo] = useState(false)
@@ -80,7 +80,7 @@ export default function VoiceChannelUI({ channel }) {
         <div className="flex h-12 items-center justify-between border-b border-border px-4">
           <div className="flex items-center">
             <Volume2 className="mr-2 h-5 w-5 text-muted-foreground" />
-            <h2 className="font-semibold">{channel.name}</h2>
+            <h2 className="font-semibold">{activeChannel.name}</h2>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm">
@@ -159,21 +159,7 @@ export default function VoiceChannelUI({ channel }) {
           </div>
 
           {/* Volume control */}
-          <div className="border-t border-border p-4">
-            <div className="mb-4 flex items-center gap-2">
-              <Volume2 className="h-5 w-5" />
-              <div className="flex-1">
-                <Slider
-                  value={volume}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={setVolume}
-                />
-              </div>
-              <span className="min-w-8 text-right text-sm">{volume}%</span>
-            </div>
-          </div>
+          
 
           {/* Voice controls */}
           <div className="flex items-center justify-center gap-2 border-t border-border p-4">
