@@ -105,6 +105,7 @@ const createTextChannel = async (req,res)=>{
       message: 'Channel created successfully',
     });
   } catch (error) {
+    cosole.log(error.message)
     res.status(500).json({ success: false, message: "Server error" });
   }
 }
