@@ -28,7 +28,7 @@ import {
   DropdownMenuItem
 } from "../ui/dropdownMenu"
 
-// Mock data
+import image from "/kuru_.jpg"
 
 const mockMessages = [
   {
@@ -63,7 +63,7 @@ const mockMessages = [
     attachments: [
       {
         type: "image",
-        url: "C:/Users/kamal/Desktop/Melodify/public/photos/kuru_.jpg",
+        url: image,
         name: "concept-art.png"
       }
     ]
@@ -108,7 +108,7 @@ const mockMessages = [
   }
 ]
 
-export default function ChatBox({ activeChannel }) {
+export default function ChatBox({ activeChannel,activeUser }) {
   const [messages, setMessages] = useState(mockMessages)
   const [newMessage, setNewMessage] = useState("")
   const messagesEndRef = useRef(null)
@@ -119,8 +119,29 @@ export default function ChatBox({ activeChannel }) {
 
   useEffect(() => {
     scrollToBottom()
+    console.log(activeUser)
   }, [messages])
 
+   useEffect(() => {
+      const fetchMessages = async () => {
+        try {
+          const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelMessages?channelId=${activeChannel._id}`);
+          const data = await response.json();
+          
+          if (data.success) {
+            console.log(data.data)
+          }else {
+            console.error(data)
+          }
+        } catch (error) {
+          console.error("Error fetching messages:", error);
+        }
+      };
+      fetchMessages(); 
+  
+    }, [activeChannel._id]);
+
+    
   const handleSendMessage = e => {
     e.preventDefault()
     if (!newMessage.trim()) return
@@ -187,7 +208,7 @@ export default function ChatBox({ activeChannel }) {
         <div className="flex h-12 items-center justify-between border-b border-border px-4">
           <div className="flex items-center">
             <Hash className="mr-2 h-5 w-5 text-muted-foreground" />
-            <h2 className="font-semibold">{channel.name}</h2>
+            <h2 className="font-semibold">{activeChannel.name}</h2>
           </div>
           <Button variant="ghost" size="icon">
             <Info className="h-5 w-5" />
@@ -225,27 +246,7 @@ export default function ChatBox({ activeChannel }) {
                         </span>
                       </div>
                       <p className="mt-1">{message.content}</p>
-                      {message.attachments?.map((attachment, i) => (
-                        <div key={i} className="mt-2 rounded-md">
-                          {attachment.type === "image" && (
-                            <img
-                              src={attachment.url || "/placeholder.svg"}
-                              alt={attachment.name || "Attachment"}
-                              className="max-h-80 rounded-md"
-                            />
-                          )}
-                          {attachment.type === "link" && (
-                            <a
-                              href={attachment.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center rounded-md border border-border p-2 text-primary hover:underline"
-                            >
-                              <span>{attachment.name || attachment.url}</span>
-                            </a>
-                          )}
-                        </div>
-                      ))}
+                      
                     </div>
                   </div>
                 </div>
@@ -273,7 +274,7 @@ export default function ChatBox({ activeChannel }) {
               <Input
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
-                placeholder={`Message #${channel.name}`}
+                placeholder={`Message #${activeChannel.name}`}
                 className="pr-12 md:pr-24"
               />
               {/* Desktop actions - visible on larger screens */}
