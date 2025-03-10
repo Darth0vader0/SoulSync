@@ -43,74 +43,86 @@ const onlineUsers=
 
 
 export default function Sidebar({ setActiveChannel, activeChannel,setActiveServerData }) {
-  const [activeServer, setActiveServer] = useState([])
-
-  const [servers,setServers]= useState([])
+  const [servers, setServers] = useState([]);       // List of all servers
+  const [activeServer, setActiveServer] = useState([]); // Selected server
+  const [textChannels, setTextChannels] = useState([]);
+  const [voiceChannels, setVoiceChannels] = useState([]);
 
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        const response = await fetch("https://soulsync-52q9.onrender.com/getServers", {
+        const response = await fetch("http://localhost:3001/getServers", {
           method: "GET",
           credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
-  
-        if (!response.ok) throw new Error("Failed to fetch data");
-  
+
+        if (!response.ok) throw new Error("Failed to fetch servers");
+
         const result = await response.json();
-        console.log((result.server));
         setServers(result.servers);
+
+        // ✅ Auto-select the first server if none is active
+        if (result.servers.length > 0) {
+          setActiveServer(result.servers[0]);  
+        }
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching servers:", err.message);
       }
     };
 
-  
-  fetchServers();
+    fetchServers();
   }, []);
 
 
-  const [textChannels, setTextChannels] = useState([]);
-  const [voiceChannels, setVoiceChannels] = useState([]);
 
-  const handleServerClick =async (server) => {
-    setActiveServer(server)
-    setTextChannels([]);
+
+  const handleServerClick = async (server,event) => {
+    
+    document.querySelectorAll(".server-icon").forEach(btn => {
+      btn.classList.remove("active");
+    });
+  
+    // Add "active" class to the clicked button
+    event.currentTarget.classList.add("active");
+
+
+    console.log(server)
+    setActiveServer(server); // Update active server
+    console.log(activeServer)
+    setTextChannels([]);  // Reset channels before fetching new ones
     setVoiceChannels([]);
     try {
-      const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelsByServer?serverId=${server._id}`, {
+      const response = await fetch(`http://localhost:3001/getChannelsByServer?serverId=${server._id}`, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
-      
+
       const data = await response.json();
       if (data.success) {
-        // Separate channels into text and voice
         const text = data.channels.filter(channel => channel.type === "text");
         const voice = data.channels.filter(channel => channel.type === "voice");
 
         setTextChannels(text);
         setVoiceChannels(voice);
-        console.log("textChannels",textChannels)
-        console.log("voiceChannels",voiceChannels)
-  
+        console.log("text",text)
+        console.log("voice",voice)
+        // ✅ Auto-select the first text channel when switching servers
+        if (text.length > 0) {
+          setActiveChannel(text[0]);
+        }
       } else {
         console.error("Error fetching channels:", data.message);
       }
     } catch (error) {
       console.error("Error fetching channels:", error);
     }
-    // Set the first text channel as active when switching servers
-    onChannelSelect(server.textChannels[0])
   }
+  
 
   const handleChannelClick = (channel) => {
-    setActiveChannel(channel._id)
-    
+    setActiveChannel(channel)
   }
  
 
@@ -139,14 +151,9 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
               <Tooltip key={server._id}>
                 <TooltipTrigger asChild>
                   <button
-                    className={`server-icon ${
-                      activeServer._id === server._id ? "active" : ""
-                    }`}
-                    onClick={() => handleServerClick(server)}
+                    className={`server-icon`}
+                    onClick={(e) => handleServerClick(server,e)}
                   >
-                    {server._id === activeServer._id && (
-                      <div className="server-icon-indicator"></div>
-                    )}
                     {server.name.slice(0,1)}
                   </button>
                 </TooltipTrigger>

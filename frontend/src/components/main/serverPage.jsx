@@ -15,7 +15,7 @@ export default function ServerPage() {
    useEffect(() => {
       const fetchUserData = async () => {
         try {
-          const response = await fetch("https://soulsync-52q9.onrender.com/getUserData", {
+          const response = await fetch("http://localhost:3001/getUserData", {
             method: "GET",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
