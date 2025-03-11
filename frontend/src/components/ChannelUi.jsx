@@ -23,7 +23,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
    useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelMessages?channelId=${activeChannel._id}`);
+        const response = await fetch(`http://localhost:3001/getChannelMessages?channelId=${activeChannel._id}`);
         const data = await response.json();
         
         if (data.success) {
@@ -62,7 +62,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
 
     // Send to Socket.io
     socket.emit("sendMessage", newMessage);
-    const response = await fetch('https://soulsync-52q9.onrender.com/sendMessageToChannel',{
+    const response = await fetch('http://localhost:3001/sendMessageToChannel',{
       method: 'POST',
       credentials: 'include',
       headers: {
