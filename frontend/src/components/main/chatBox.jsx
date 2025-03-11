@@ -130,6 +130,20 @@ export default function ChatBox({ activeChannel,activeUser }) {
           
           if (data.success) {
             console.log(data.data)
+            const formattedMessage = data.data.map((message) => ({
+              id: message._id.toString(),
+              content: message.content,
+              timestamp: new Date(message.timestamp),
+              user: {
+                id: message.senderId.toString(),
+                name: message.senderUsername,
+                avatar: message.senderUsername.charAt(0).toUpperCase(),
+              },
+              // Keep attachments if present in the response
+              attachments: message.attachments ? message.attachments : undefined,
+            }))
+            console.log("fomatted data",formattedMessage)
+            setMessages(formattedMessage);
           }else {
             console.error(data)
           }
