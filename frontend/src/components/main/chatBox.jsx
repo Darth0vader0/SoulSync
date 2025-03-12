@@ -27,8 +27,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem
 } from "../ui/dropdownMenu"
-
+import io from "socket.io-client"
 import image from "/kuru_.jpg"
+const socket = io('https://soulsync-52q9.onrender.com',{
+  withCredentials: true,
+  transports: ['websocket','polling'],
+
+})
 
 const mockMessages = [
   {
@@ -152,11 +157,24 @@ export default function ChatBox({ activeChannel,activeUser }) {
         }
       };
       fetchMessages(); 
+
+      if (activeChannel._id) {
+        // fetchMessages();
+        socket.emit("joinChannel", activeChannel._id);
+      }
+  
+      // Listen for incoming messages
+      socket.on("receiveMessage", (newMessage) => {
+        if(newMessage.channelId === activeChannel._id) { setMessages((prevMessages) => [...prevMessages, newMessage]);}
+       
+      });
+  
+      return () => socket.off("receiveMessage"); // Cleanup
   
     }, [activeChannel._id]);
 
     
-  const handleSendMessage = e => {
+  const handleSendMessage = async (e) => {
     e.preventDefault()
     if (!newMessage.trim()) return
 
@@ -165,14 +183,38 @@ export default function ChatBox({ activeChannel,activeUser }) {
       content: newMessage,
       timestamp: new Date(),
       user: {
-        id: "1", // Current user
-        name: "Jane Smith",
-        avatar: "JS"
+        id: activeUser._id, // Current user
+        name: activeUser.username,
+        avatar: activeUser.username.charAt[0]
       }
     }
+    const emitMessage = {
+      channelId : activeChannel._id,
+      senderId: activeUser._id,
+      senderUsername:activeUser.username,
+      content: newMessage,
+    };
 
     setMessages([...messages, message])
     setNewMessage("")
+
+     // Send to Socket.io
+     socket.emit("sendMessage", emitMessage);
+     const response = await fetch('http://localhost:3001/sendMessageToChannel',{
+       method: 'POST',
+       credentials: 'include',
+       headers: {
+         'Content-Type': 'application/json',
+       },
+       body: JSON.stringify({
+         content: newMessage,
+         channelId: activeChannel._id,
+       }),
+     })
+     if (!response.ok) {
+       console.error('Failed to send message');
+       return;
+     }
   }
 
   const formatTime = date => {
@@ -180,6 +222,9 @@ export default function ChatBox({ activeChannel,activeUser }) {
   }
 
   const formatDate = date => {
+    if (!(date instanceof Date)) {
+      date = new Date(date); // Convert to Date object if it's a string
+    }
     const today = new Date()
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)
