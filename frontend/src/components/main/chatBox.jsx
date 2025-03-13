@@ -27,108 +27,23 @@ import {
   DropdownMenuContent,
   DropdownMenuItem
 } from "../ui/dropdownMenu"
-import io from "socket.io-client"
 import image from "/kuru_.jpg"
-const socket = io('https://soulsync-52q9.onrender.com',{
-  withCredentials: true,
-  transports: ['websocket','polling'],
+import { Skeleton } from "../ui/skeleton"
 
-})
-
-const mockMessages = [
-  {
-    id: "1",
-    content: "Hey everyone! Welcome to the general channel 👋",
-    timestamp: new Date(Date.now() - 3600000 * 2),
-    user: {
-      id: "1",
-      name: "Jane Smith",
-      avatar: "JS"
-    }
-  },
-  {
-    id: "2",
-    content: "Thanks! Excited to be here. What's everyone working on?",
-    timestamp: new Date(Date.now() - 3600000),
-    user: {
-      id: "2",
-      name: "John Doe",
-      avatar: "JD"
-    }
-  },
-  {
-    id: "3",
-    content: "I'm building a new game. Check out this concept art:",
-    timestamp: new Date(Date.now() - 1800000),
-    user: {
-      id: "3",
-      name: "Alex Johnson",
-      avatar: "AJ"
-    },
-    attachments: [
-      {
-        type: "image",
-        url: image,
-        name: "concept-art.png"
-      }
-    ]
-  },
-  {
-    id: "4",
-    content: "That looks amazing! What engine are you using?",
-    timestamp: new Date(Date.now() - 900000),
-    user: {
-      id: "1",
-      name: "Jane Smith",
-      avatar: "JS"
-    }
-  },
-  {
-    id: "5",
-    content:
-      "I'm using Unity. Here's the documentation link if anyone's interested:",
-    timestamp: new Date(Date.now() - 600000),
-    user: {
-      id: "3",
-      name: "Alex Johnson",
-      avatar: "AJ"
-    },
-    attachments: [
-      {
-        type: "link",
-        url: "https://unity.com/documentation",
-        name: "Unity Documentation"
-      }
-    ]
-  },
-  {
-    id: "6",
-    content: "I've been learning React lately. It's pretty fun!",
-    timestamp: new Date(Date.now() - 300000),
-    user: {
-      id: "2",
-      name: "John Doe",
-      avatar: "JD"
-    }
-  }
-]
 
 export default function ChatBox({ activeChannel,activeUser }) {
-  const [messages, setMessages] = useState(mockMessages)
+  const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState("")
   const messagesEndRef = useRef(null)
-
+  const [loading , setLoading] = useState(false)
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
-
-  useEffect(() => {
-    scrollToBottom()
-    console.log(activeUser)
-  }, [messages])
+ 
 
    useEffect(() => {
       const fetchMessages = async () => {
+        setLoading(true)
         try {
           const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelMessages?channelId=${activeChannel._id}`);
           const data = await response.json();
@@ -154,30 +69,29 @@ export default function ChatBox({ activeChannel,activeUser }) {
           }
         } catch (error) {
           console.error("Error fetching messages:", error);
+        }finally{
+          setTimeout(()=>{
+            setLoading(false)
+          },2000)
         }
       };
       fetchMessages(); 
 
-      if (activeChannel._id) {
-        // fetchMessages();
-        socket.emit("joinChannel", activeChannel._id);
-      }
-  
-      // Listen for incoming messages
-      socket.on("receiveMessage", (newMessage) => {
-        if(newMessage.channelId === activeChannel._id) { setMessages((prevMessages) => [...prevMessages, newMessage]);}
-       
-      });
-  
-      return () => socket.off("receiveMessage"); // Cleanup
+    
   
     }, [activeChannel._id]);
+
+  useEffect(() => {
+    if (!loading) {
+      scrollToBottom() // Scroll only when loading is false
+    }
+    }, [messages,loading])
+
 
     
   const handleSendMessage = async (e) => {
     e.preventDefault()
     if (!newMessage.trim()) return
-
     const message = {
       id: Date.now().toString(),
       content: newMessage,
@@ -185,21 +99,12 @@ export default function ChatBox({ activeChannel,activeUser }) {
       user: {
         id: activeUser._id, // Current user
         name: activeUser.username,
-        avatar: activeUser.username.charAt[0]
+        avatar: activeUser.username.slice(0,1)
       }
     }
-    const emitMessage = {
-      channelId : activeChannel._id,
-      senderId: activeUser._id,
-      senderUsername:activeUser.username,
-      content: newMessage,
-    };
-
     setMessages([...messages, message])
     setNewMessage("")
 
-     // Send to Socket.io
-     socket.emit("sendMessage", emitMessage);
      const response = await fetch('http://localhost:3001/sendMessageToChannel',{
        method: 'POST',
        credentials: 'include',
@@ -259,8 +164,27 @@ export default function ChatBox({ activeChannel,activeUser }) {
       groupedMessages[groupedMessages.length - 1].messages.push(message)
     }
   })
-
+  console.log(groupedMessages)
   return (
+    <>{
+
+    loading ?
+    <div className="flex flex-col p-4 space-y-4 animate-pulse">
+    {/* Simulating multiple chat messages */}
+    {[...Array(5)].map((_, index) => (
+      <div key={index} className="flex items-start gap-3">
+        {/* Avatar Skeleton */}
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="space-y-2">
+          {/* Username Line */}
+          <Skeleton className="h-4 w-32" />
+          {/* Message Lines */}
+          <Skeleton className="h-4 w-96" />
+          <Skeleton className="h-4 w-80" />
+        </div>
+      </div>
+    ))}
+  </div> :
     <TooltipProvider>
       <div className="flex h-full flex-col">
         {/* Channel header */}
@@ -433,5 +357,7 @@ export default function ChatBox({ activeChannel,activeUser }) {
         </div>
       </div>
     </TooltipProvider>
+}
+    </>
   )
 }
