@@ -72,7 +72,7 @@ export default function ChatBox({ activeChannel,activeUser }) {
         }finally{
           setTimeout(()=>{
             setLoading(false)
-          },2000)
+          },1000)
         }
       };
       fetchMessages(); 

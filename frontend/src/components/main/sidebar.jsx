@@ -30,6 +30,7 @@ import {
   SidebarMenuItem,
   SidebarRail
 } from "../ui/sidebar"
+import { Skeleton } from "../ui/skeleton"
 
 // Mock data
 
@@ -47,7 +48,9 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+ 
   useEffect(() => {
     const fetchServers = async () => {
       try {
@@ -87,9 +90,9 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
     event.currentTarget.classList.add("active");
 
 
-    console.log(server)
+ 
     setActiveServer(server); // Update active server
-    console.log(activeServer)
+    setLoading(true);
     setTextChannels([]);  // Reset channels before fetching new ones
     setVoiceChannels([]);
     try {
@@ -118,13 +121,15 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
     } catch (error) {
       console.error("Error fetching channels:", error);
     }
+    setTimeout(()=>{
+      setLoading(false)
+    },1000)
   }
   
 
   const handleChannelClick = (channel) => {
     setActiveChannel(channel)
   }
- 
 
 
 
@@ -195,17 +200,24 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {textChannels.map(channel => (
-                    <SidebarMenuItem key={channel._id}>
-                      <SidebarMenuButton
-                        isActive={activeChannel._id === channel._id}
-                        onClick={() => handleChannelClick(channel)}
-                      >
-                        <Hash className="mr-2 h-4 w-4" />
-                        <span>{channel.name}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                  {loading?
+                  <div className="mt-4 space-y-3 animate-pulse">
+                  {[...Array(4)].map((_, index) => (
+                    <Skeleton key={index} className="h-6 w-40 rounded-md" />
                   ))}
+                </div>:
+                textChannels.map(channel => (
+                  <SidebarMenuItem key={channel._id}>
+                    <SidebarMenuButton
+                      isActive={activeChannel._id === channel._id}
+                      onClick={() => handleChannelClick(channel)}
+                    >
+                      <Hash className="mr-2 h-4 w-4" />
+                      <span>{channel.name}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+                  }
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -217,17 +229,24 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {voiceChannels.map(channel => (
-                    <SidebarMenuItem key={channel._id}>
-                      <SidebarMenuButton
-                        isActive={activeChannel._id === channel._id}
-                        onClick={() => handleChannelClick(channel)}
-                      >
-                        <Volume2 className="mr-2 h-4 w-4" />
-                        <span>{channel.name}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                  {loading?
+                  <div className="mt-4 space-y-3 animate-pulse">
+                  {[...Array(4)].map((_, index) => (
+                    <Skeleton key={index} className="h-6 w-40 rounded-md" />
                   ))}
+                </div>:
+                voiceChannels.map(channel => (
+                  <SidebarMenuItem key={channel._id}>
+                    <SidebarMenuButton
+                      isActive={activeChannel._id === channel._id}
+                      onClick={() => handleChannelClick(channel)}
+                    >
+                      <Volume2 className="mr-2 h-4 w-4" />
+                      <span>{channel.name}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+                }
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
