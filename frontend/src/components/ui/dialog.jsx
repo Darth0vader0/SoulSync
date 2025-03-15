@@ -1,40 +1,44 @@
 import * as React from "react";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { cn } from "../../utils/utils"; // Adjust path if needed
+import { cn } from "../../utils/utils";
 
-const Dialog = DialogPrimitive.Root;
-const DialogTrigger = DialogPrimitive.Trigger;
-const DialogPortal = DialogPrimitive.Portal;
-
-const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity",
-      className
-    )}
-    {...props}
-  />
-));
-DialogOverlay.displayName = "DialogOverlay";
-
-const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
+const Dialog = ({ open, onOpenChange, children, className }) => {
+  return (
+    <div
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg transition-transform",
+        "fixed inset-0 z-50 flex items-center justify-center bg-black/50",
+        open ? "visible" : "hidden",
         className
       )}
-      {...props}
+      onClick={() => onOpenChange(false)}
     >
-      {children}
-    </DialogPrimitive.Content>
-  </DialogPortal>
-));
-DialogContent.displayName = "DialogContent";
+      <div
+        className="relative w-full max-w-md bg-background p-6 rounded-lg shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
 
-const DialogClose = DialogPrimitive.Close;
+const DialogContent = ({ children, className }) => (
+  <div className={cn("space-y-4", className)}>{children}</div>
+);
 
-export { Dialog, DialogTrigger, DialogContent, DialogClose };
+const DialogHeader = ({ children, className }) => (
+  <div className={cn("text-lg font-semibold", className)}>{children}</div>
+);
+
+const DialogTitle = ({ children, className }) => (
+  <h2 className={cn("text-xl font-bold", className)}>{children}</h2>
+);
+
+const DialogDescription = ({ children, className }) => (
+  <p className={cn("text-muted-foreground", className)}>{children}</p>
+);
+
+const DialogFooter = ({ children, className }) => (
+  <div className={cn("flex justify-end space-x-2", className)}>{children}</div>
+);
+
+export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter };

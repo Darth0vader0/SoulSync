@@ -31,7 +31,9 @@ import {
   SidebarRail
 } from "../ui/sidebar"
 import { Skeleton } from "../ui/skeleton"
-
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
+import { Input } from "../ui/input"
+import { Label } from "../ui/lable"
 // Mock data
 
 
@@ -42,14 +44,43 @@ const onlineUsers=
     { id: "3", username: "Bob Johnson", status: "online",avatar:"BJ" }
   ]
 
+  const serverIconCSS = `
+  .server-icon {
+    min-height: 48px;
+    min-width: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
+   
+    color: white;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.25rem;
+  }
+  
+  .server-icon.active {
+    border-radius: 30%;
+  }
+  
+  .server-icon:hover {
+    border-radius: 30%;
+  }
+  `
+  const styleSheet = document.createElement("style")
+styleSheet.type = "text/css"
+styleSheet.innerText = serverIconCSS
+document.head.appendChild(styleSheet)
 export default function Sidebar({ setActiveChannel, activeChannel,setActiveServerData }) {
   const [servers, setServers] = useState([]);       // List of all servers
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [createServerDialogOpen, setCreateServerDialogOpen] = useState(false)
+  const [joinServerDialogOpen, setJoinServerDialogOpen] = useState(false)
  
   useEffect(() => {
     const fetchServers = async () => {
@@ -168,7 +199,9 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
             <Separator className="my-2 w-10" />
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="server-icon bg-muted hover:bg-green-600">
+                <button className="server-icon bg-muted hover:bg-green-600"
+                  onClick={() => setCreateServerDialogOpen(true)}
+                >
                   <Plus className="h-6 w-6" />
                 </button>
               </TooltipTrigger>
@@ -176,7 +209,9 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="server-icon bg-muted hover:bg-primary">
+                <button className="server-icon bg-muted hover:bg-primary"
+                  onClick={() => setJoinServerDialogOpen(true)}
+                >
                   <UserPlus className="h-6 w-6" />
                 </button>
               </TooltipTrigger>
@@ -287,6 +322,118 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
             <SidebarRail />
           </SidebarContent>
         </div>
+         {/* Create Server Dialog */}
+         <Dialog open={createServerDialogOpen} onOpenChange={setCreateServerDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create a new server</DialogTitle>
+              <DialogDescription>Enter a name for your new server. You can always change it later.</DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                const formData = new FormData(e.target)
+                const serverName = formData.get("serverName")
+
+                try {
+                  const response = await fetch("http://localhost:3001/createServer", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: serverName }),
+                  })
+
+                  if (!response.ok) throw new Error("Failed to create server")
+
+                  const result = await response.json()
+                  setCreateServerDialogOpen(false)
+                  setServers((prevServers) => [...prevServers, result.server]);
+                } catch (error) {
+                  console.error("Error creating server:", error)
+                }
+              }}
+            >
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="serverName" className="col-span-4">
+                    Server name
+                  </Label>
+                  <Input
+                    id="serverName"
+                    name="serverName"
+                    placeholder="My Awesome Server"
+                    className="col-span-4"
+                    required
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setCreateServerDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Create Server</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Join Server Dialog */}
+        <Dialog open={joinServerDialogOpen} onOpenChange={setJoinServerDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Join a server</DialogTitle>
+              <DialogDescription>Enter an invite URL to join an existing server.</DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault()
+                const formData = new FormData(e.target)
+                const inviteUrl = formData.get("inviteUrl")
+
+                try {
+                  const response = await fetch("http://localhost:3001/joinServer", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ inviteUrl }),
+                  })
+
+                  if (!response.ok) throw new Error("Failed to join server")
+
+                  const result = await response.json()
+                  if (result.success) {
+                    // Add the joined server to the list
+                    setServers([...servers, result.server])
+                    setJoinServerDialogOpen(false)
+                  }
+                } catch (error) {
+                  console.error("Error joining server:", error)
+                }
+              }}
+            >
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="inviteUrl" className="col-span-4">
+                    Invite URL
+                  </Label>
+                  <Input
+                    id="inviteUrl"
+                    name="inviteUrl"
+                    placeholder="https://example.com/invite/abc123"
+                    className="col-span-4"
+                    required
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setJoinServerDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Join Server</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </ShadcnSidebar>
     </TooltipProvider>
   )
