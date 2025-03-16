@@ -15,7 +15,7 @@ const {registerUser, loginUser,getUserData} = require('./controllers/auth.contro
 const {sendMessage,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 
 const authMiddleware = require('./middleware/auth.middleware');
-const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel } = require('./controllers/server.controller');
+const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel,joinServerViaInvite } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
 
 
@@ -71,6 +71,8 @@ app.get('/getServers',authMiddleware,getServers)
 app.get('/getChannelsByServer',authMiddleware, getChannelsByServer);
 app.post('/createTextChannel',authMiddleware,createTextChannel)
 app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
+app.post("/joinServer",authMiddleware,joinServerViaInvite)
+
 app.get("/getUser", async (req, res) => {
   try {
     const user = await User.findById(req.query.userId);

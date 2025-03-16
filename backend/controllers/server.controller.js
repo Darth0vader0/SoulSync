@@ -156,4 +156,37 @@ const getChannelsByServer = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 }
-module.exports = { createServer ,getServers,getChannelsByServer,createTextChannel,createVoiceChannel};
+
+const joinServerViaInvite = async (req, res) => {
+  const serverLink = req.body.inviteUrl;
+  if (!serverLink) {
+    console.error("Missing server link");
+    return res.status(400).json({ error: "Missing server link" });
+  }
+
+  if (serverLink.slice(0, 18) !== 'https://soul-sync/') {
+    console.error('Invalid server link');
+    return res.status(400).json({ error: 'Invalid server link' });
+  }
+  const serverId = serverLink.slice(18);
+  const userId = req.user.userId;
+  console.log(userId);
+  try {
+    const server = await Server.findById(serverId);
+    if (!server) return res.status(404).json({ error: 'Server not found' });
+    if (server.members.includes(userId)) {
+      console.error('User is already a member of this server');
+      return res.status(400).json({ error: 'User is already a member of this server' });
+    }
+    server.members.push(userId);
+    await server.save();
+    res.status(200).json({ message: 'User joined server successfully' ,server: server ,success:true});
+    } catch (error) {
+    console.error('Error joining server:', error);
+    res.status(500).json
+    ({ error: 'Internal Server Error' });
+    }
+
+}
+
+module.exports = { createServer ,getServers,getChannelsByServer,createTextChannel,createVoiceChannel,joinServerViaInvite};

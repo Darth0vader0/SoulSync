@@ -81,7 +81,8 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
   const [loading, setLoading] = useState(false);
   const [createServerDialogOpen, setCreateServerDialogOpen] = useState(false)
   const [joinServerDialogOpen, setJoinServerDialogOpen] = useState(false)
- 
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
+  
   useEffect(() => {
     const fetchServers = async () => {
       try {
@@ -161,8 +162,30 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
   const handleChannelClick = (channel) => {
     setActiveChannel(channel)
   }
+  const handleInviteClick = async () => {
+    if (!activeServer || !activeServer._id) return
+    setInviteDialogOpen(true)
+  }
 
 
+  const copyInviteLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink)
+      setCopying(true)
+      toast({
+        title: "Copied!",
+        description: "Invite link copied to clipboard",
+      })
+      setTimeout(() => setCopying(false), 2000)
+    } catch (error) {
+      console.error("Failed to copy:", error)
+      toast({
+        title: "Failed to copy",
+        description: "Please try again or copy manually",
+        variant: "destructive",
+      })
+    }
+  }
 
   const getStatusColor = status => {
     switch (status) {
@@ -223,9 +246,20 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
           <SidebarContent className="w-56 border-l border-border bg-card">
             <SidebarHeader className="flex items-center justify-between p-4">
               <h2 className="text-lg font-bold">{activeServer.name}</h2>
+              <div className="flex items-center space-x-2">
+              <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" onClick={handleInviteClick}>
+                      <UserPlus className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Invite People</TooltipContent>
+                </Tooltip>
               <Button variant="ghost" size="icon">
                 <Settings className="h-5 w-5" />
               </Button>
+              </div>
+             
             </SidebarHeader>
 
             <SidebarGroup>
@@ -391,7 +425,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
                 const inviteUrl = formData.get("inviteUrl")
 
                 try {
-                  const response = await fetch("http://localhost:3001/joinServer", {
+                  const response = await fetch(`http://localhost:3001/joinServer`, {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
@@ -403,7 +437,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
                   const result = await response.json()
                   if (result.success) {
                     // Add the joined server to the list
-                    setServers([...servers, result.server])
+                    setServers((newServer)=>[...newServer, result.server])
                     setJoinServerDialogOpen(false)
                   }
                 } catch (error) {
@@ -432,6 +466,20 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
                 <Button type="submit">Join Server</Button>
               </DialogFooter>
             </form>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Invite People to {activeServer.name}</DialogTitle>
+              <DialogDescription>Share this link with others to invite them to your server</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Input value={`https://soul-sync/${activeServer._id}`} readOnly onClick={(e) => e.target.select()} />
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setInviteDialogOpen(false)}>Done</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </ShadcnSidebar>

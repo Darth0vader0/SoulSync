@@ -4,7 +4,7 @@ const authMiddleware = (req, res, next) => {
   // Log cookies to check if JWT is present
   // Get token from cookies
   const token = req.cookies.jwt;
-  console.log(token)
+
   if (!token) {
     
     return res.status(401).json({ message: "No token, authorization denied" });
@@ -13,7 +13,8 @@ const authMiddleware = (req, res, next) => {
   // Verify the token
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach decoded user data to request object
+    req.user = decoded;
+   // Attach decoded user data to request object
     next(); // Continue to the next middleware or route handler
   } catch (error) {
     console.error("Invalid token:", error);
