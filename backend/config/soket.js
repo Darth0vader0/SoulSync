@@ -21,8 +21,6 @@ const setupSocket = (io) => {
         timestamp: new Date()
       };
 
-    
-
       // Emit the message to everyone in the channel
       io.to(channelId).emit("receiveMessage", newMessage);
     });

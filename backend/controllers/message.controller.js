@@ -27,7 +27,7 @@ const getChannelMessages = async (req, res) => {
     const channelId = req.query.channelId;
 
     const messages = await GcMessages.find({ channelId }).sort({ timestamp: 1 });
-    console.log(messages);
+
     res.status(200).json({ success: true, data: messages });
   } catch (error) {
     console.error(error);

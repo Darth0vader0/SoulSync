@@ -6,9 +6,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 // Register User
 const registerUser = async (req, res) => {
-  try {
-    console.log(req.body);
-    
+  try {    
     const { username, email, password } = req.body;
 
     // Check if user already exists
@@ -34,7 +32,7 @@ const loginUser = async (req, res) => {
  
   
   try {
-    console.log("into");
+
     
     const { email, password } = req.body;
     
@@ -48,14 +46,13 @@ const loginUser = async (req, res) => {
 
     // Generate JWT Token
     const token = jwt.sign({ userId: user._id,username:user.username }, process.env.JWT_SECRET);
-    console.log(token)
+
     res.cookie("jwt",token,{
       maxAge :3600*1000*24,
       httpOnly:true,
       sameSite: "lax",
       secure : false
   });
-
 
     res.status(200).json({ message: "Login successful" });
   } catch (error) {

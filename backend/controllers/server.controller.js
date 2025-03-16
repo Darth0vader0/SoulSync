@@ -9,10 +9,6 @@ const createServer = async (req, res) => {
   
   try {
     const { name } = req.body;
-    console.log(req.cookies.jwt)
-
-     // Assuming authentication middleware attaches `user` object to `req`
-    
     if (!name) {
       return res.status(400).json({ error: 'Server name is required' });
     }
@@ -142,8 +138,7 @@ const createVoiceChannel = async (req,res)=>{
 
 
 const getChannelsByServer = async (req, res) => {
- 
-  
+
   try {
     const  serverId  = req.query.serverId;
 
@@ -170,7 +165,7 @@ const joinServerViaInvite = async (req, res) => {
   }
   const serverId = serverLink.slice(18);
   const userId = req.user.userId;
-  console.log(userId);
+
   try {
     const server = await Server.findById(serverId);
     if (!server) return res.status(404).json({ error: 'Server not found' });
