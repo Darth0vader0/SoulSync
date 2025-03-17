@@ -44,6 +44,7 @@ const ChannelUI = ({ activeChannel,activeUser}) => {
 
     // Listen for incoming messages
     socket.on("receiveMessage", (newMessage) => {
+      console.log(newMessage)
       if(newMessage.channelId === activeChannel._id) { setMessages((prevMessages) => [...prevMessages, newMessage]);}
      
     });

@@ -82,7 +82,14 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
   const [createServerDialogOpen, setCreateServerDialogOpen] = useState(false)
   const [joinServerDialogOpen, setJoinServerDialogOpen] = useState(false)
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
-  
+  const [isDmView, setIsDmView] = useState(false)
+  const [directMessages, setDirectMessages] = useState([
+    { id: "1", username: "Alice Cooper", status: "online", avatar: "AC", lastMessage: "Hey there!" },
+    { id: "2", username: "Bob Dylan", status: "idle", avatar: "BD", lastMessage: "Can you help me?" },
+    { id: "3", username: "Carol King", status: "dnd", avatar: "CK", lastMessage: "Thanks for yesterday" },
+    { id: "4", username: "Dave Grohl", status: "offline", avatar: "DG", lastMessage: "Let's chat later" },
+  ])
+
   useEffect(() => {
     const fetchServers = async () => {
       try {
@@ -204,8 +211,36 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
     <TooltipProvider>
       <ShadcnSidebar className="flex border-r border-border">
         <div className="flex h-full">
+       
+            
           {/* Server icons column */}
           <div className="flex w-[72px] flex-col items-center gap-2 overflow-y-auto bg-background p-2 py-4">
+          <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className={`server-icon ${isDmView ? "active bg-primary" : "bg-muted"}`}
+                  onClick={() => setIsDmView(!isDmView)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-6 w-6"
+                  >
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Direct Messages</TooltipContent>
+            </Tooltip>
+            <Separator className="my-2 w-10" />
+            
             {servers.map(server => (
               <Tooltip key={server._id}>
                 <TooltipTrigger asChild>

@@ -29,7 +29,12 @@ import {
 } from "../ui/dropdownMenu"
 import image from "/kuru_.jpg"
 import { Skeleton } from "../ui/skeleton"
+import io from 'socket.io-client';
+const socket = io('http://localhost:3001',{
+  withCredentials: true,
+  transports: ['websocket','polling'],
 
+})
 
 export default function ChatBox({ activeChannel,activeUser }) {
   const [messages, setMessages] = useState([])
@@ -49,7 +54,6 @@ export default function ChatBox({ activeChannel,activeUser }) {
           const data = await response.json();
           
           if (data.success) {
-            console.log(data.data)
             const formattedMessage = data.data.map((message) => ({
               id: message._id.toString(),
               content: message.content,
@@ -62,7 +66,7 @@ export default function ChatBox({ activeChannel,activeUser }) {
               // Keep attachments if present in the response
               attachments: message.attachments ? message.attachments : undefined,
             }))
-            console.log("fomatted data",formattedMessage)
+         
             setMessages(formattedMessage);
           }else {
             console.error(data)
@@ -76,10 +80,33 @@ export default function ChatBox({ activeChannel,activeUser }) {
         }
       };
       fetchMessages(); 
-
-    
-  
+      if (activeChannel._id) {
+        socket.emit("joinChannel", activeChannel._id);
+      }
     }, [activeChannel._id]);
+
+    useEffect(()=>{
+     // Listen for incoming messages
+     socket.on("receiveMessage", (newMessage) => {
+    
+      const soketMessage = {
+        id: Date.now().toString(),
+        content: newMessage.content,
+        timestamp: new Date(),
+        user: {
+          id: newMessage.senderId, // Current user
+          name: newMessage.senderUsername,
+          avatar: newMessage.senderUsername.slice(0,1)
+        }
+      }
+      if(newMessage.channelId === activeChannel._id) { setMessages((prevMessages) => [...prevMessages, soketMessage])}
+     
+    });
+
+    return () => socket.off("receiveMessage"); // Cleanup
+  
+
+    })
 
   useEffect(() => {
     if (!loading) {
@@ -102,8 +129,14 @@ export default function ChatBox({ activeChannel,activeUser }) {
         avatar: activeUser.username.slice(0,1)
       }
     }
-    setMessages([...messages, message])
     setNewMessage("")
+
+    socket.emit("sendMessage", {
+      channelId : activeChannel._id,
+      senderId: activeUser._id,
+      senderUsername:activeUser.username,
+      content: newMessage,
+    });
 
      const response = await fetch('http://localhost:3001/sendMessageToChannel',{
        method: 'POST',
@@ -164,7 +197,7 @@ export default function ChatBox({ activeChannel,activeUser }) {
       groupedMessages[groupedMessages.length - 1].messages.push(message)
     }
   })
-  console.log(groupedMessages)
+
   return (
     <>{
 

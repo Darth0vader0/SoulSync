@@ -11,7 +11,7 @@ const setupSocket = (io) => {
     // Listen for messages and broadcast them
     socket.on("sendMessage", async (message) => {
       const { channelId, senderId, senderUsername, content } = message;
-
+      console.log(message);
       // Create message object
       const newMessage = {
         senderId,
