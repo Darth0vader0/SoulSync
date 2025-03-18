@@ -34,6 +34,7 @@ import { Skeleton } from "../ui/skeleton"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
 import { Input } from "../ui/input"
 import { Label } from "../ui/lable"
+import socket from "../../utils/socket"
 // Mock data
 
 
@@ -73,16 +74,18 @@ const onlineUsers=
 styleSheet.type = "text/css"
 styleSheet.innerText = serverIconCSS
 document.head.appendChild(styleSheet)
-export default function Sidebar({ setActiveChannel, activeChannel,setActiveServerData }) {
+export default function Sidebar({ setActiveChannel, activeChannel,activeUser }) {
   const [servers, setServers] = useState([]);       // List of all servers
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [createServerDialogOpen, setCreateServerDialogOpen] = useState(false)
   const [joinServerDialogOpen, setJoinServerDialogOpen] = useState(false)
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
   const [isDmView, setIsDmView] = useState(false)
+
   const [directMessages, setDirectMessages] = useState([
     { id: "1", username: "Alice Cooper", status: "online", avatar: "AC", lastMessage: "Hey there!" },
     { id: "2", username: "Bob Dylan", status: "idle", avatar: "BD", lastMessage: "Can you help me?" },
@@ -103,7 +106,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
 
         const result = await response.json();
         setServers(result.servers);
-
+        
         // ✅ Auto-select the first server if none is active
         if (result.servers.length > 0) {
           setActiveServer(result.servers[0]);  
@@ -112,10 +115,33 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
         console.error("Error fetching servers:", err.message);
       }
     };
-
     fetchServers();
   }, []);
 
+  useEffect(() => {
+    if (!activeUser || servers.length === 0) return;
+  
+    const serverIds = servers.map(server => server._id);
+  
+    // Emit userConnected when component mounts
+    socket.emit("userConnected", { userId: activeUser._id, serverIds });
+  
+    // Listen for real-time online users update
+    const handleUpdateOnlineUsers = (data) => {
+      console.log("🔵 Active Users Per Server:", data);
+    };
+  
+    socket.on("updateOnlineUsers", handleUpdateOnlineUsers);
+  
+    return () => {
+      // Emit userDisconnected when component unmounts
+      socket.emit("userDisconnected", { userId: activeUser._id, serverIds });
+  
+      // Remove event listener to prevent memory leaks
+      socket.off("updateOnlineUsers", handleUpdateOnlineUsers);
+    };
+  }, [activeUser, servers]);
+  
 
 
 
@@ -160,6 +186,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,setActiveServe
     } catch (error) {
       console.error("Error fetching channels:", error);
     }
+
     setTimeout(()=>{
       setLoading(false)
     },1000)

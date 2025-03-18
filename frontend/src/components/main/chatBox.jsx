@@ -27,14 +27,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem
 } from "../ui/dropdownMenu"
-import image from "/kuru_.jpg"
-import { Skeleton } from "../ui/skeleton"
-import io from 'socket.io-client';
-const socket = io('http://localhost:3001',{
-  withCredentials: true,
-  transports: ['websocket','polling'],
 
-})
+import { Skeleton } from "../ui/skeleton"
+
+import socket from "../../utils/socket"
 
 export default function ChatBox({ activeChannel,activeUser }) {
   const [messages, setMessages] = useState([])
@@ -83,6 +79,9 @@ export default function ChatBox({ activeChannel,activeUser }) {
       if (activeChannel._id) {
         socket.emit("joinChannel", activeChannel._id);
       }
+  
+    
+  
     }, [activeChannel._id]);
 
     useEffect(()=>{

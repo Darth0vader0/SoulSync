@@ -17,7 +17,8 @@ const {sendMessage,getMessages,sendMessageToChannel,getChannelMessages} = requir
 const authMiddleware = require('./middleware/auth.middleware');
 const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel,joinServerViaInvite } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
-
+// Connect to MongoDB
+db();
 
 app.use(cookieParse());
 
@@ -35,8 +36,7 @@ setupSocket(io);        // Messaging
 setupVoiceSocket(io);  // Voice Channels
 
 
-// Connect to MongoDB
-db();
+
 app.use(cors({ 
 
   origin: ["http://localhost:5173","http://192.168.242.210:5173","https://soul-sync-omega.vercel.app"], // Frontend URL
