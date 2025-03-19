@@ -84,7 +84,7 @@ export default function ServerPage() {
             activeChannel.type === "text" ? (
               <ChatBox activeChannel={activeChannel} activeUser={user}  />
             ) : (
-              <VoiceChannelUI activeChannel={activeChannel} setActiveChannel={setActiveChannel}  activerServerData={activerServerData} userId={user} />
+              <VoiceChannelUI activeChannel={activeChannel} setActiveChannel={setActiveChannel}  activerServerData={activerServerData} activeUser={user} />
             )
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-400">

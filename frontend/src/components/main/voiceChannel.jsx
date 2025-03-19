@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import {
   Mic,
   MicOff,
@@ -21,57 +21,52 @@ import {
   TooltipProvider
 } from "../ui/tooltip"
 import { Slider } from "../ui/slider"
+import socket from "../../utils/socket"
 
 // Mock data
 const connectedUsers = [
-  {
-    id: "1",
-    name: "Jane Smith",
-    avatar: "JS",
-    isSpeaking: true,
-    isMuted: false,
-    isDeafened: false,
-    hasVideo: false,
-    isScreenSharing: false
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    avatar: "JD",
-    isSpeaking: false,
-    isMuted: true,
-    isDeafened: false,
-    hasVideo: false,
-    isScreenSharing: false
-  },
-  {
-    id: "3",
-    name: "Alex Johnson",
-    avatar: "AJ",
-    isSpeaking: false,
-    isMuted: false,
-    isDeafened: true,
-    hasVideo: true,
-    isScreenSharing: false
-  },
-  {
-    id: "4",
-    name: "Sam Wilson",
-    avatar: "SW",
-    isSpeaking: false,
-    isMuted: false,
-    isDeafened: false,
-    hasVideo: false,
-    isScreenSharing: true
-  }
+ 
 ]
 
-export default function VoiceChannelUI({ activeChannel,activerServerData,setActiveChannel, userId }) {
+export default function VoiceChannelUI({ activeChannel,activerServerData,setActiveChannel, activeUser }) {
   const [isMuted, setIsMuted] = useState(false)
   const [isDeafened, setIsDeafened] = useState(false)
   const [hasVideo, setHasVideo] = useState(false)
   const [isScreenSharing, setIsScreenSharing] = useState(false)
   const [volume, setVolume] = useState([50])
+
+  const [connectedUsers, setConnectedUsers] = useState([]); // Track real-time users
+  const [currentChannel, setCurrentChannel] = useState(null); // Store the current channel
+
+  useEffect(() => {
+    if (!activeUser || !activeChannel) return;
+
+    // If the user is switching channels, leave the previous one first
+    if (currentChannel && currentChannel !== activeChannel._id) {
+      socket.emit("leaveVoiceChannel", { user : activeUser });
+    }
+
+    // Join the new channel
+    socket.emit("joinVoiceChannel", { channelId: activeChannel._id, user: activeUser});
+    setCurrentChannel(activeChannel._id);
+
+    // Listen for real-time updates
+    socket.on("userList", (users) => {
+      console.log("🔄 Updated Voice Channel Users:", users);
+      
+    });
+
+    // Handle disconnect (tab close, refresh)
+    const handleBeforeUnload = () => {
+      socket.emit("leaveVoiceChannel", { user :activeUser });
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      socket.off("userList");
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [activeChannel, activeUser]);
 
   return (
     <TooltipProvider>
