@@ -75,7 +75,7 @@ const onlineUsers=
 styleSheet.type = "text/css"
 styleSheet.innerText = serverIconCSS
 document.head.appendChild(styleSheet)
-export default function Sidebar({ setActiveChannel, activeChannel,activeUser }) {
+export default function Sidebar({ setActiveChannel, activeChannel,activeUser,setActiveDmChat }) {
   const [servers, setServers] = useState([]);       // List of all servers
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
@@ -283,7 +283,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser }) 
                 <TooltipTrigger asChild>
                   <button
                     className={`server-icon`}
-                    onClick={(e) =>{setIsDmView(false); handleServerClick(server,e)}}
+                    onClick={(e) =>{setActiveDmChat(null);setIsDmView(false); handleServerClick(server,e)}}
                   >
                     {server.name.slice(0,1)}
                   </button>
@@ -331,6 +331,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser }) 
                         key={user.id}
                         className="flex items-center w-full p-2 rounded-md hover:bg-[#2f3136] transition"
                          // Set active DM chat
+                         onClick={()=>setActiveDmChat(user)}
                       >
                         {/* Avatar */}
                         <div className="relative">
@@ -388,7 +389,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser }) 
                  <SidebarMenuItem key={channel._id}>
                    <SidebarMenuButton
                      isActive={activeChannel._id === channel._id}
-                     onClick={() => handleChannelClick(channel)}
+                     onClick={() =>{ handleChannelClick(channel)}}
                    >
                      <Hash className="mr-2 h-4 w-4" />
                      <span>{channel.name}</span>
