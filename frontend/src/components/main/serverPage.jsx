@@ -91,9 +91,9 @@ export default function ServerPage() {
             <div className="mb-5">
              <img src={image} alt="" className="w-full h-auto"  />
             </div>
-            <h2 className="text-2xl font-bold mb-2">select a channel to keep communicate</h2>
+            <h2 className="text-2xl font-bold mb-2">select a channel or DM to keep communicate</h2>
             <p className="text-center mb-6 max-w-md">
-              No text or voice channels are currently selected. Choose a channel from the sidebar or start a conversation.
+              No channels or DM are currently selected. Choose a channel from the sidebar or start a conversation.
             </p>
           </div>
           )}
