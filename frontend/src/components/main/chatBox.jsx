@@ -137,7 +137,7 @@ export default function ChatBox({ activeChannel,activeUser }) {
       content: newMessage,
     });
 
-     const response = await fetch('http://localhost:3001/sendMessageToChannel',{
+     const response = await fetch('https://soul-sync-omega.vercel.app/sendMessageToChannel',{
        method: 'POST',
        credentials: 'include',
        headers: {

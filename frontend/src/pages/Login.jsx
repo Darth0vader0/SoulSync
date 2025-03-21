@@ -14,7 +14,7 @@ export const Login = () => {
     e.preventDefault();
 
   try {
-    const response = await fetch("http://localhost:3001/login", {
+    const response = await fetch("https://soul-sync-omega.vercel.app/login", {
       method: "POST",
       credentials: "include", // Important for cookies
       headers: {

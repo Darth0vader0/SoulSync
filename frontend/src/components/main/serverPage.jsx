@@ -19,7 +19,7 @@ export default function ServerPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://localhost:3001/getUserData", {
+        const response = await fetch("https://soul-sync-omega.vercel.app/getUserData", {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

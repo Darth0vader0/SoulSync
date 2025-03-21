@@ -97,7 +97,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        const response = await fetch("http://localhost:3001/getServers", {
+        const response = await fetch("https://soul-sync-omega.vercel.app/getServers", {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -171,7 +171,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
     setTextChannels([]);  // Reset channels before fetching new ones
     setVoiceChannels([]);
     try {
-      const response = await fetch(`http://localhost:3001/getChannelsByServer?serverId=${server._id}`, {
+      const response = await fetch(`https://soul-sync-omega.vercel.app/getChannelsByServer?serverId=${server._id}`, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -482,7 +482,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                 const serverName = formData.get("serverName")
 
                 try {
-                  const response = await fetch("http://localhost:3001/createServer", {
+                  const response = await fetch("https://soul-sync-omega.vercel.app/createServer", {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
@@ -537,7 +537,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                 const inviteUrl = formData.get("inviteUrl")
 
                 try {
-                  const response = await fetch(`http://localhost:3001/joinServer`, {
+                  const response = await fetch(`https://soul-sync-omega.vercel.app/joinServer`, {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
