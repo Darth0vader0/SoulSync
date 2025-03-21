@@ -27,6 +27,8 @@ const setupVoiceSocket = (io) => {
       });
 
       updateUserList(io, channelId);
+       // Notify other users to start WebRTC connection
+      socket.to(channelId).emit("user-joined", { userId: user._id, username: user.username });
     });
 
     // 🎤 User manually disconnects from voice
@@ -36,7 +38,18 @@ const setupVoiceSocket = (io) => {
         removeUserFromChannel(io, channelId, user._id);
       }
     });
-
+    socket.on("offer", ({ targetUserId, offer }) => {
+      io.to(targetUserId).emit("offer", { senderId: socket.id, offer });
+    });
+    
+    socket.on("answer", ({ targetUserId, answer }) => {
+      io.to(targetUserId).emit("answer", { senderId: socket.id, answer });
+    });
+    
+    socket.on("ice-candidate", ({ targetUserId, candidate }) => {
+      io.to(targetUserId).emit("ice-candidate", { senderId: socket.id, candidate });
+    });
+    
     // ❌ Handle user disconnection (closing tab, refreshing, etc.)
     socket.on("disconnect", () => {
       console.log(`❌ Voice user disconnected: ${socket.id}`);
