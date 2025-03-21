@@ -97,7 +97,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        const response = await fetch("https://soul-sync-omega.vercel.app/getServers", {
+        const response = await fetch("https://soulsync-52q9.onrender.com/getServers", {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -171,7 +171,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
     setTextChannels([]);  // Reset channels before fetching new ones
     setVoiceChannels([]);
     try {
-      const response = await fetch(`https://soul-sync-omega.vercel.app/getChannelsByServer?serverId=${server._id}`, {
+      const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelsByServer?serverId=${server._id}`, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -482,7 +482,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                 const serverName = formData.get("serverName")
 
                 try {
-                  const response = await fetch("https://soul-sync-omega.vercel.app/createServer", {
+                  const response = await fetch("https://soulsync-52q9.onrender.com/createServer", {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
@@ -537,7 +537,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                 const inviteUrl = formData.get("inviteUrl")
 
                 try {
-                  const response = await fetch(`https://soul-sync-omega.vercel.app/joinServer`, {
+                  const response = await fetch(`https://soulsync-52q9.onrender.com/joinServer`, {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
