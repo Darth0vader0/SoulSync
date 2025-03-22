@@ -5,7 +5,7 @@ const jwt =require('jsonwebtoken');
 const sendMessage = async (req, res) => {
   try {
     const { senderId, receiverId, message } = req.body;
-
+    
     const newMessage = new Message({
       senderId,
       receiverId,

@@ -35,7 +35,7 @@ export default function DmChatBox() {
     scrollToBottom()
   }, [messages])
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault()
     if (!newMessage.trim()) return
 
@@ -44,9 +44,26 @@ export default function DmChatBox() {
       content: newMessage,
       senderId: activeUser?._id
     }
-
-    setMessages((prevMessages) => [...prevMessages, message])
+    const messageContent = newMessage;
     setNewMessage("")
+    const response= await fetch("/send",{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        senderId: activeUser?._id,
+        receiverId: selectedUser?._id,
+        message: messageContent
+      })
+    })
+    const data = await response.json()
+    if (!data.success) {
+      console.error("Error sending message:", data.message)
+      return
+    }
+    setMessages((prevMessages) => [...prevMessages, message])
+    
   }
 
   return (
