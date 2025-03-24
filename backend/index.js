@@ -11,7 +11,7 @@ const { Server } = require("socket.io");
 const User = require('./models/User.model');
 
 const PORT = 3001;
-const {registerUser, loginUser,getUserData} = require('./controllers/auth.controller')
+const {registerUser, loginUser,getUserData,getAllUsers} = require('./controllers/auth.controller')
 const {sendMessage,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 
 const authMiddleware = require('./middleware/auth.middleware');
@@ -31,10 +31,11 @@ const io = new Server(server, {
   }
 });
 const setupSocket = require("./config/soket");
-const setupVoiceSocket = require("./config/voiceSocket");
+const setupVoiceSocket  =require("./config/voiceSocket");
+const DmSocket= require('./config/DmSocket')
 setupSocket(io);        // Messaging
 setupVoiceSocket(io);  // Voice Channels
-
+DmSocket(io);
 
 
 app.use(cors({ 
@@ -63,7 +64,7 @@ app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
 app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
 app.get("/getChannelMessages",getChannelMessages)
-
+app.post('/sendMessageToDM',authMiddleware,getAllUsers)
 //server routes
 
 app.post('/createServer',authMiddleware, createServer);

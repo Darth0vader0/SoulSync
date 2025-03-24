@@ -117,6 +117,14 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
       }
     };
     fetchServers();
+    const users = getAllUsers();
+    users.then((data) => {
+        setDirectMessages(data)
+    }
+    ).catch((error) => {
+        console.error("Error fetching users:", error.message);
+    } )
+    
   }, []);
 
   useEffect(() => {
@@ -201,7 +209,19 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
       setLoading(false)
     },1000)
   }
-  
+  async function getAllUsers (){
+    const response = await fetch("https://soulsync-52q9.onrender.com/getAllUsers", {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    })
+    const data = await response.json()
+    if (data.success) {
+      return data.users
+    } else {
+      console.error("Error fetching users:", data.message)
+    }
+  }
 
   const handleChannelClick = (channel) => {
     setActiveChannel(channel)
@@ -328,7 +348,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                   <div className="px-2 space-y-2">
                     {directMessages.map((user) => (
                       <button
-                        key={user.id}
+                        key={user._id}
                         className="flex items-center w-full p-2 rounded-md hover:bg-[#2f3136] transition"
                          // Set active DM chat
                          onClick={()=>setActiveDmChat(user)}
@@ -337,7 +357,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                         <div className="relative">
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={user.username} />
-                            <AvatarFallback>{user.avatar}</AvatarFallback>
+                            <AvatarFallback>{user.username.slice(0,1)}</AvatarFallback>
                           </Avatar>
                           <div
                             className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card ${getStatusColor(user.status)}`}
@@ -347,7 +367,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                         {/* Username & Last Message Preview */}
                         <div className="ml-3 flex flex-col text-left">
                           <span className="text-sm font-medium">{user.username}</span>
-                          <span className="text-xs text-gray-400">{user.lastMessage}</span>
+                    
                         </div>
                       </button>
                     ))}

@@ -1,70 +1,55 @@
 "use client"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect } from "react";
 import {
-  Smile,
   Paperclip,
-  Image,
   Send
-} from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import socket from "../../utils/socket";
 
-export default function DmChatBox() {
-    const activeUser ={
-        _id : "821801dbi39"
-    }
-    const selectedUser ={
-        _id : "810d1901138c"
-    }
-  const [messages, setMessages] = useState([
-    { id: "1", content: "Hey there! 👋", senderId: selectedUser?._id },
-    { id: "2", content: "Yo! How’s it going?", senderId: activeUser?._id },
-    { id: "3", content: "All good! Just working on SoulSync. 🚀", senderId: selectedUser?._id },
-    { id: "4", content: "Nice! Keep grinding. 💪", senderId: activeUser?._id }
-  ])
-  
-  const [newMessage, setNewMessage] = useState("")
-  const messagesEndRef = useRef(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+export default function DmChatBox({ activeUser, selectedUser }) {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (!activeUser?._id || !selectedUser?._id) return;
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault()
-    if (!newMessage.trim()) return
+    // Connect to socket & join DM room
+    socket.connect();
+    socket.emit("joinDm", { userId: activeUser._id });
+
+    // Receive real-time messages
+    socket.on("receiveDmMessage", (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    return () => {
+      socket.off("receiveDmMessage");
+      socket.disconnect();
+    };
+  }, [activeUser, selectedUser]);
+
+  // Handle Sending Messages
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
 
     const message = {
       id: Date.now().toString(),
-      content: newMessage,
-      senderId: activeUser?._id
-    }
-    const messageContent = newMessage;
-    setNewMessage("")
-    const response= await fetch("/send",{
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        senderId: activeUser?._id,
-        receiverId: selectedUser?._id,
-        message: messageContent
-      })
-    })
-    const data = await response.json()
-    if (!data.success) {
-      console.error("Error sending message:", data.message)
-      return
-    }
-    setMessages((prevMessages) => [...prevMessages, message])
-    
-  }
+      content: newMessage.trim(),
+      senderId: activeUser._id,
+      receiverId: selectedUser._id,
+    };
+
+    setMessages((prevMessages) => [...prevMessages, message]);
+    setNewMessage("");
+
+    // Send message via socket
+    socket.emit("sendDmMessage", message);
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -82,15 +67,15 @@ export default function DmChatBox() {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 scrollbar-hide">
         {messages.map((message) => (
-          <div key={message.id} className={`mb-4 flex ${message.senderId === activeUser?._id ? "justify-end" : "justify-start"}`}>
+          <div key={message.id} className={`mb-4 flex ${message.senderId === activeUser._id ? "justify-end" : "justify-start"}`}>
             <div className="flex items-start gap-3">
-              {message.senderId !== activeUser?._id && (
+              {message.senderId !== activeUser._id && (
                 <Avatar>
                   <AvatarImage src="/placeholder.svg?height=40&width=40" alt={selectedUser?.username} />
-                  <AvatarFallback>{selectedUser?.username?.slice(0,1)}</AvatarFallback>
+                  <AvatarFallback>{selectedUser?.username?.charAt(0)}</AvatarFallback>
                 </Avatar>
               )}
-              <div className={`p-2 rounded-lg ${message.senderId === activeUser?._id ? "bg-blue-600 text-white" : "bg-purple-400"}`}>
+              <div className={`p-2 rounded-lg ${message.senderId === activeUser._id ? "bg-blue-600 text-white" : "bg-purple-400 text-white"}`}>
                 {message.content}
               </div>
             </div>
@@ -116,5 +101,5 @@ export default function DmChatBox() {
         </form>
       </div>
     </div>
-  )
+  );
 }
