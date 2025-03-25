@@ -87,12 +87,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
   const [isDmView, setIsDmView] = useState(false)
 
-  const [directMessages, setDirectMessages] = useState([
-    { id: "1", username: "Alice Cooper", status: "online", avatar: "AC", lastMessage: "Hey there!" },
-    { id: "2", username: "Bob Dylan", status: "idle", avatar: "BD", lastMessage: "Can you help me?" },
-    { id: "3", username: "Carol King", status: "dnd", avatar: "CK", lastMessage: "Thanks for yesterday" },
-    { id: "4", username: "Dave Grohl", status: "offline", avatar: "DG", lastMessage: "Let's chat later" },
-  ])
+  const [directMessages, setDirectMessages] = useState([])
 
   useEffect(() => {
     const fetchServers = async () => {
@@ -119,7 +114,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
     fetchServers();
     const users = getAllUsers();
     users.then((data) => {
-        setDirectMessages(data)
+      setDirectMessages(data.filter(user => user._id !== activeUser._id))
     }
     ).catch((error) => {
         console.error("Error fetching users:", error.message);
