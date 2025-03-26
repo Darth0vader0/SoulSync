@@ -62,7 +62,6 @@ app.get('/getUserData',authMiddleware,getUserData)
 app.get("/getAllUsers",authMiddleware,getAllUsers)
 //messages api
 app.get('/:senderId/:receiverId',getMessages);
-app.post('/send',sendMessage);
 app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
 app.get("/getChannelMessages",getChannelMessages)
 app.post('/sendMessageToDM',authMiddleware,sendMessageToDM);
@@ -75,15 +74,6 @@ app.post('/createTextChannel',authMiddleware,createTextChannel)
 app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
 app.post("/joinServer",authMiddleware,joinServerViaInvite)
 
-app.get("/getUser", async (req, res) => {
-  try {
-    const user = await User.findById(req.query.userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({ success: true, user });
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
 
 app.use((req,res,next) => {
   req.io=io;
