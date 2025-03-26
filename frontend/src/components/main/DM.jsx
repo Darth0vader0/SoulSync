@@ -45,7 +45,7 @@ function DmChatBox({ activeUser, selectedUser }) {
   useEffect(() => {
     const fetchedMessages = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/${activeUser._id}/${selectedUser._id}`);
+        const response = await fetch(`https://soulsync-52q9.onrender.com/${activeUser._id}/${selectedUser._id}`);
         const data = await response.json();
         console.log(data);
         setMessages(data.data);
@@ -102,7 +102,7 @@ function DmChatBox({ activeUser, selectedUser }) {
     socket.emit('sendMessage', message);
     setNewMessage("");
     //add message to database
-    const response = await fetch("http://localhost:3001/sendMessageToDm", {
+    const response = await fetch("https://soulsync-52q9.onrender.com/sendMessageToDm", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

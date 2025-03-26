@@ -263,8 +263,6 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
     <TooltipProvider>
       <ShadcnSidebar className="flex border-r border-border">
         <div className="flex h-full">
-       
-            
           {/* Server icons column */}
           <div className="flex w-[72px] flex-col items-center gap-2 overflow-y-auto bg-background p-2 py-4">
           <Tooltip>
