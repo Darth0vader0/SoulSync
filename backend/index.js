@@ -12,7 +12,7 @@ const User = require('./models/User.model');
 
 const PORT = 3001;
 const {registerUser, loginUser,getUserData,getAllUsers} = require('./controllers/auth.controller')
-const {sendMessage,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
+const {sendMessageToDM,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 
 const authMiddleware = require('./middleware/auth.middleware');
 const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel,joinServerViaInvite } = require('./controllers/server.controller');
@@ -59,12 +59,13 @@ app.use(limiter);
 app.post('/signup', registerUser)
 app.post('/login', loginUser)
 app.get('/getUserData',authMiddleware,getUserData)
+app.get("/getAllUsers",authMiddleware,getAllUsers)
 //messages api
 app.get('/:senderId/:receiverId',getMessages);
 app.post('/send',sendMessage);
 app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
 app.get("/getChannelMessages",getChannelMessages)
-app.post('/sendMessageToDM',authMiddleware,getAllUsers)
+app.post('/sendMessageToDM',authMiddleware,sendMessageToDM);
 //server routes
 
 app.post('/createServer',authMiddleware, createServer);

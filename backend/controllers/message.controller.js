@@ -2,7 +2,7 @@ const {Message,GcMessages} = require("../models/message.model");
 const jwt =require('jsonwebtoken');
 
 // Send a message
-const sendMessage = async (req, res) => {
+const sendMessageToDM = async (req, res) => {
   try {
     const { senderId, receiverId, message } = req.body;
     
@@ -74,4 +74,4 @@ const getMessages = async (req, res) => {
   }
 };
 
-module.exports = { sendMessage, getMessages ,sendMessageToChannel,getChannelMessages};
+module.exports = { sendMessageToDM, getMessages ,sendMessageToChannel,getChannelMessages};
