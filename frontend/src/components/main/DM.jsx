@@ -104,6 +104,7 @@ function DmChatBox({ activeUser, selectedUser }) {
     //add message to database
     const response = await fetch("https://soulsync-52q9.onrender.com/sendMessageToDM", {
       method: "POST",
+      credentials: "include", // Important for cookies
       headers: {
         "Content-Type": "application/json"
       },
