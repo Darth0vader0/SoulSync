@@ -33,7 +33,7 @@ export const Login = () => {
     }
 
     console.log("Login Successful:", data);
-    window.location.href = "/serverPage";
+    window.location.href = "/mainchat";
   } catch (error) {
     console.error("Login Error:", error.message);
   }
