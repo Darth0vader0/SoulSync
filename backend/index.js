@@ -59,7 +59,7 @@ app.use(limiter);
 app.post('/signup', registerUser)
 app.post('/login', loginUser)
 app.get('/getUserData',authMiddleware,getUserData)
-app.get('/getAllUsers',getAllUsers)
+app.get('/getAllUsers',authMiddleware,getAllUsers)
 //messages api
 app.get('/:senderId/:receiverId',authMiddleware,getMessages);
 app.post('/sendMessageToDm',authMiddleware,sendMessageToDM);

@@ -46,7 +46,13 @@ export default function ChatBox({ activeChannel,activeUser }) {
       const fetchMessages = async () => {
         setLoading(true)
         try {
-          const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelMessages?channelId=${activeChannel._id}`);
+          const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelMessages?channelId=${activeChannel._id}`,
+            {
+              method: "GET",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+            }
+          );
           const data = await response.json();
           
           if (data.success) {
