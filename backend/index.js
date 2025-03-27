@@ -31,11 +31,11 @@ const io = new Server(server, {
   }
 });
 const setupSocket = require("./config/soket");
-const setupVoiceSocket  =require("./config/voiceSocket");
-const DmSocket= require('./config/DmSocket')
+const setupVoiceSocket = require("./config/voiceSocket");
+const DmSocket = require("./config/DmSocket");  
 setupSocket(io);        // Messaging
 setupVoiceSocket(io);  // Voice Channels
-DmSocket(io);
+DmSocket(io);    // Direct Messaging
 
 
 app.use(cors({ 
@@ -59,12 +59,13 @@ app.use(limiter);
 app.post('/signup', registerUser)
 app.post('/login', loginUser)
 app.get('/getUserData',authMiddleware,getUserData)
-app.get("/getAllUsers",authMiddleware,getAllUsers)
+app.get('/getAllUsers',getAllUsers)
 //messages api
-app.get('/:senderId/:receiverId',getMessages);
+app.get('/:senderId/:receiverId',authMiddleware,getMessages);
+app.post('/sendMessageToDm',authMiddleware,sendMessageToDM);
 app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
-app.get("/getChannelMessages",getChannelMessages)
-app.post('/sendMessageToDM',authMiddleware,sendMessageToDM);
+app.get("/getChannelMessages",authMiddleware,getChannelMessages)
+
 //server routes
 
 app.post('/createServer',authMiddleware, createServer);
@@ -74,6 +75,15 @@ app.post('/createTextChannel',authMiddleware,createTextChannel)
 app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
 app.post("/joinServer",authMiddleware,joinServerViaInvite)
 
+app.get("/getUser", async (req, res) => {
+  try {
+    const user = await User.findById(req.query.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 app.use((req,res,next) => {
   req.io=io;

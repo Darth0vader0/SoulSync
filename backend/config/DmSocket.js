@@ -5,15 +5,14 @@ const DmSocket = (io) => {
     console.log('User connected for DM', socket.id);
 
     // Handle user connection
-    socket.on('userConnected', (userId) => {
-      // Store the socket ID for the connected user
+    socket.on('userConnectedToDm', (userId) => {
       connectedUsersInDm.set(userId, socket.id);
-      console.log(`User ${userId} connected to DM socket`);
+      socket.join(userId); // Ensure user can receive messages directed to their userId
+      console.log(`User ${userId} connected with socket ${socket.id}`);
     });
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      // Remove the user from connected users when they disconnect
       for (const [userId, socketId] of connectedUsersInDm.entries()) {
         if (socketId === socket.id) {
           connectedUsersInDm.delete(userId);
@@ -23,20 +22,19 @@ const DmSocket = (io) => {
       }
     });
 
-    // Handle joining a specific DM room
+    // Handle joining a DM room (not needed since users now auto-join their own room)
     socket.on('joinDm', (receiverId) => {
       socket.join(receiverId);
-      console.log("Active user joined chat of", receiverId);
+      console.log(`User joined chat room: ${receiverId}`);
     });
 
     // Handle sending a message
     socket.on('sendMessage', (message) => {
       const { receiverId } = message;
-      
-      // Emit the message to the specific receiver's room
+
+      // Send message to the correct room (userId-based)
       io.to(receiverId).emit("receiveMessage", message);
       
-      // Optional: You might want to save the message to a database here
       console.log('Message sent:', message);
     });
   });

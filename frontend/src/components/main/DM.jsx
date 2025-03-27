@@ -43,6 +43,10 @@ function DmChatBox({ activeUser, selectedUser }) {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    socket.emit("userConnectedToDm", activeUser._id);
+  }, [activeUser._id]);
+  
+  useEffect(() => {
     const fetchedMessages = async () => {
       try {
         const response = await fetch(`https://soulsync-52q9.onrender.com/${activeUser._id}/${selectedUser._id}`);
