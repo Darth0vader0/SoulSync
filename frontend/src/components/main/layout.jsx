@@ -21,7 +21,7 @@ export default function Layout({ children }) {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3001/logout", {
+      const response = await fetch("http://soulsync-52q9.onrender.com/logout", {
         method: "GET",
         credentials: "include", // Ensure cookies are included
       });
