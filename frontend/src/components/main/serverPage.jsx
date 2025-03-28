@@ -7,7 +7,7 @@ import VoiceChannelUI from "./voiceChannel"
 import DM from "./DM"  // Import the DM component
 import image from "../../assets/image-removebg-preview.png";
 import { Skeleton } from "../ui/skeleton"
-import useNavigate from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 export default function ServerPage() {
   const [activeChannel, setActiveChannel] = useState(null); // Track selected channel
   const [activeDmChat, setActiveDmChat] = useState(null); // Track active DM
