@@ -1,7 +1,8 @@
 "use client"
-import { User, Settings, LogOut } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { Button } from "../ui/button"
+import { useNavigate } from "react-router-dom";
+import { User, Settings, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +10,34 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from "../ui/dropdownMenu"
-import { SidebarTrigger } from "../ui/sidebar"
+} from "../ui/dropdownMenu";
+import { SidebarTrigger } from "../ui/sidebar";
+import { useState } from "react";
 
 export default function Layout({ children }) {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:3001/logout", {
+        method: "GET",
+        credentials: "include", // Ensure cookies are included
+      });
+
+      if (response.ok) {
+        navigate("/login"); // Redirect to login page
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden">
       <header className="flex h-14 items-center justify-between border-b border-border px-4">
@@ -45,9 +70,9 @@ export default function Layout({ children }) {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} disabled={loading}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{loading ? "Logging out..." : "Log out"}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -55,5 +80,5 @@ export default function Layout({ children }) {
       </header>
       <main className="flex flex-1 overflow-hidden">{children}</main>
     </div>
-  )
+  );
 }

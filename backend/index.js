@@ -60,6 +60,16 @@ app.post('/signup', registerUser)
 app.post('/login', loginUser)
 app.get('/getUserData',authMiddleware,getUserData)
 app.get('/getAllUsers',authMiddleware,getAllUsers)
+app.get('/logout',(req,res)=>{
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: true, 
+    sameSite: "Strict",
+    path: "/",
+});
+res.status(200).json({ message: "Logged out successfully" });
+})
+
 //messages api
 app.get('/:senderId/:receiverId',authMiddleware,getMessages);
 app.post('/sendMessageToDm',authMiddleware,sendMessageToDM);

@@ -226,26 +226,6 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
     setInviteDialogOpen(true)
   }
 
-
-  const copyInviteLink = async () => {
-    try {
-      await navigator.clipboard.writeText(inviteLink)
-      setCopying(true)
-      toast({
-        title: "Copied!",
-        description: "Invite link copied to clipboard",
-      })
-      setTimeout(() => setCopying(false), 2000)
-    } catch (error) {
-      console.error("Failed to copy:", error)
-      toast({
-        title: "Failed to copy",
-        description: "Please try again or copy manually",
-        variant: "destructive",
-      })
-    }
-  }
-
   const getStatusColor = status => {
     switch (status) {
       case "online":
@@ -328,156 +308,169 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
           </div>
           {/* Channels column */}
           <SidebarContent className="w-56 border-l border-border bg-card">
-           
-            {isDmView?<div>
+            {isDmView ? <div>
               <input
-              type="text"
-              placeholder="Search"
-              className="bg-[#202225] h-8 m-3 text-[#dcddde] flex items-center justify-between  px-2 py-1 rounded text-sm w-36 focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
-            />
-            <Separator className="my-2  w-50" />
-            {/* add users to chat here ... */}
-               {/* List of DM Users */}
-                  <div className="px-2 space-y-2">
-                    {directMessages.map((user) => (
-                      <button
-                        key={user._id}
-                        className="flex items-center w-full p-2 rounded-md hover:bg-[#2f3136] transition"
-                         // Set active DM chat
-                         onClick={()=>setActiveDmChat(user)}
-                      >
-                        {/* Avatar */}
-                        <div className="relative">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={user.username} />
-                            <AvatarFallback>{user.username.slice(0,1)}</AvatarFallback>
-                          </Avatar>
-                          <div
-                            className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card ${getStatusColor(user.status)}`}
-                          ></div>
-                        </div>
+                type="text"
+                placeholder="Search"
+                className="bg-[#202225] h-8 m-3 text-[#dcddde] flex items-center justify-between  px-2 py-1 rounded text-sm w-36 focus:outline-none focus:ring-2 focus:ring-[#5865f2]"
+              />
+              <Separator className="my-2  w-50" />
+              {/* add users to chat here ... */}
+              {/* List of DM Users */}
+              <div className="px-2 space-y-2">
+                {directMessages.map((user) => (
+                  <button
+                    key={user._id}
+                    className="flex items-center w-full p-2 rounded-md hover:bg-[#2f3136] transition"
+                    // Set active DM chat
+                    onClick={() => setActiveDmChat(user)}
+                  >
+                    {/* Avatar */}
+                    <div className="relative">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={user.username} />
+                        <AvatarFallback>{user.username.slice(0, 1)}</AvatarFallback>
+                      </Avatar>
+                      <div
+                        className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card ${getStatusColor(user.status)}`}
+                      ></div>
+                    </div>
 
-                        {/* Username & Last Message Preview */}
-                        <div className="ml-3 flex flex-col text-left">
-                          <span className="text-sm font-medium">{user.username}</span>
-                    
-                        </div>
-                      </button>
-                    ))}
+                    {/* Username & Last Message Preview */}
+                    <div className="ml-3 flex flex-col text-left">
+                      <span className="text-sm font-medium">{user.username}</span>
+
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div> : activeChannel === null ? (
+              <>
+                <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 space-y-4">
+                  <div className="text-3xl font-bold text-white animate-fade-in">
+                    Welcome <br /> to <br></br>SoulSync!
                   </div>
-            </div>:
-            <>
-             <SidebarHeader className="flex items-center justify-between p-4">
-             <h2 className="text-lg font-bold">{activeServer.name}</h2>
-             <div className="flex items-center space-x-2">
-             <Tooltip>
-                 <TooltipTrigger asChild>
-                   <Button variant="ghost" size="icon" onClick={handleInviteClick}>
-                     <UserPlus className="h-5 w-5" />
-                   </Button>
-                 </TooltipTrigger>
-                 <TooltipContent>Invite People</TooltipContent>
-               </Tooltip>
-             <Button variant="ghost" size="icon">
-               <Settings className="h-5 w-5" />
-             </Button>
-             </div>
-            
-           </SidebarHeader>
+                  <p className="max-w-sm text-sm text-gray-300">
+                    Choose a server from the sidebar or <br /> create a new one to start chatting.
+                  </p>
+                 
+                </div>
+              </>
+            ) :
+              (
+                <>
+                  <SidebarHeader className="flex items-center justify-between p-4">
+                    <h2 className="text-lg font-bold">{activeServer.name}</h2>
+                    <div className="flex items-center space-x-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" onClick={handleInviteClick}>
+                            <UserPlus className="h-5 w-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Invite People</TooltipContent>
+                      </Tooltip>
+                      <Button variant="ghost" size="icon">
+                        <Settings className="h-5 w-5" />
+                      </Button>
+                    </div>
 
-           <SidebarGroup>
-             <SidebarGroupLabel className="flex items-center px-2 py-1">
-               <ChevronDown className="mr-1 h-3 w-3" />
-               TEXT CHANNELS
-             </SidebarGroupLabel>
-             <SidebarGroupContent>
-               <SidebarMenu>
-                 {loading?
-                 <div className="mt-4 space-y-3 animate-pulse">
-                 {[...Array(4)].map((_, index) => (
-                   <Skeleton key={index} className="h-6 w-40 rounded-md" />
-                 ))}
-               </div>:
-               textChannels.map(channel => (
-                 <SidebarMenuItem key={channel._id}>
-                   <SidebarMenuButton
-                     isActive={activeChannel._id === channel._id}
-                     onClick={() =>{ handleChannelClick(channel)}}
-                   >
-                     <Hash className="mr-2 h-4 w-4" />
-                     <span>{channel.name}</span>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))
-                 }
-               </SidebarMenu>
-             </SidebarGroupContent>
-           </SidebarGroup>
+                  </SidebarHeader>
 
-           <SidebarGroup>
-             <SidebarGroupLabel className="flex items-center px-2 py-1">
-               <ChevronDown className="mr-1 h-3 w-3" />
-               VOICE CHANNELS
-             </SidebarGroupLabel>
-             <SidebarGroupContent>
-               <SidebarMenu>
-                 {loading?
-                 <div className="mt-4 space-y-3 animate-pulse">
-                 {[...Array(4)].map((_, index) => (
-                   <Skeleton key={index} className="h-6 w-40 rounded-md" />
-                 ))}
-               </div>:
-               voiceChannels.map(channel => (
-                 <SidebarMenuItem key={channel._id}>
-                   <SidebarMenuButton
-                     isActive={activeChannel._id === channel._id}
-                     onClick={() => handleChannelClick(channel)}
-                   >
-                     <Volume2 className="mr-2 h-4 w-4" />
-                     <span>{channel.name}</span>
-                   </SidebarMenuButton>
-                 </SidebarMenuItem>
-               ))
-               }
-               </SidebarMenu>
-             </SidebarGroupContent>
-           </SidebarGroup>
+                  <SidebarGroup>
+                    <SidebarGroupLabel className="flex items-center px-2 py-1">
+                      <ChevronDown className="mr-1 h-3 w-3" />
+                      TEXT CHANNELS
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {loading ?
+                          <div className="mt-4 space-y-3 animate-pulse">
+                            {[...Array(4)].map((_, index) => (
+                              <Skeleton key={index} className="h-6 w-40 rounded-md" />
+                            ))}
+                          </div> :
+                          textChannels.map(channel => (
+                            <SidebarMenuItem key={channel._id}>
+                              <SidebarMenuButton
+                                isActive={activeChannel._id === channel._id}
+                                onClick={() => { handleChannelClick(channel) }}
+                              >
+                                <Hash className="mr-2 h-4 w-4" />
+                                <span>{channel.name}</span>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))
+                        }
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
 
-           <div className="mt-auto">
-             <SidebarGroup>
-               <SidebarGroupLabel className="flex items-center px-2 py-1">
-                 <Users className="mr-1 h-3 w-3" />
-                 ONLINE — {onlineUsers.length}
-               </SidebarGroupLabel>
-               <SidebarGroupContent>
-                 <SidebarMenu>
-                   {onlineUsers.map(user => (
-                     <SidebarMenuItem key={user.id}>
-                       <SidebarMenuButton>
-                         <div className="relative mr-2">
-                           <Avatar className="h-6 w-6">
-                             <AvatarImage
-                               src={`/placeholder.svg?height=24&width=24`}
-                               alt={user.name}
-                             />
-                             <AvatarFallback>{user.avatar}</AvatarFallback>
-                           </Avatar>
-                           <div
-                             className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card ${getStatusColor(
-                               user.status
-                             )}`}
-                           ></div>
-                         </div>
-                         <span>{user.username}</span>
-                       </SidebarMenuButton>
-                     </SidebarMenuItem>
-                   ))}
-                 </SidebarMenu>
-               </SidebarGroupContent>
-             </SidebarGroup>
-           </div>
-           <SidebarRail />
-           </>
+                  <SidebarGroup>
+                    <SidebarGroupLabel className="flex items-center px-2 py-1">
+                      <ChevronDown className="mr-1 h-3 w-3" />
+                      VOICE CHANNELS
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {loading ?
+                          <div className="mt-4 space-y-3 animate-pulse">
+                            {[...Array(4)].map((_, index) => (
+                              <Skeleton key={index} className="h-6 w-40 rounded-md" />
+                            ))}
+                          </div> :
+                          voiceChannels.map(channel => (
+                            <SidebarMenuItem key={channel._id}>
+                              <SidebarMenuButton
+                                isActive={activeChannel._id === channel._id}
+                                onClick={() => handleChannelClick(channel)}
+                              >
+                                <Volume2 className="mr-2 h-4 w-4" />
+                                <span>{channel.name}</span>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))
+                        }
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+
+                  <div className="mt-auto">
+                    <SidebarGroup>
+                      <SidebarGroupLabel className="flex items-center px-2 py-1">
+                        <Users className="mr-1 h-3 w-3" />
+                        ONLINE — {onlineUsers.length}
+                      </SidebarGroupLabel>
+                      <SidebarGroupContent>
+                        <SidebarMenu>
+                          {onlineUsers.map(user => (
+                            <SidebarMenuItem key={user.id}>
+                              <SidebarMenuButton>
+                                <div className="relative mr-2">
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage
+                                      src={`/placeholder.svg?height=24&width=24`}
+                                      alt={user.name}
+                                    />
+                                    <AvatarFallback>{user.avatar}</AvatarFallback>
+                                  </Avatar>
+                                  <div
+                                    className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card ${getStatusColor(
+                                      user.status
+                                    )}`}
+                                  ></div>
+                                </div>
+                                <span>{user.username}</span>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                      </SidebarGroupContent>
+                    </SidebarGroup>
+                  </div>
+                  <SidebarRail />
+                </>
+              )
             }
           </SidebarContent>
         </div>
