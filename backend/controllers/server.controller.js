@@ -184,4 +184,24 @@ const joinServerViaInvite = async (req, res) => {
 
 }
 
-module.exports = { createServer ,getServers,getChannelsByServer,createTextChannel,createVoiceChannel,joinServerViaInvite};
+
+
+const getServerMembers = async (req, res) => {
+  try {
+    const { serverId } = req.params;
+
+    // Fetch all users from the given server
+    const server = await Server.findById(serverId).populate("members", "username _id");
+    
+    if (!server) {
+      return res.status(404).json({ success: false, message: "Server not found" });
+    }
+
+    res.json({ success: true, members: server.members });
+  } catch (error) {
+    console.error("Error fetching server members:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch members" });
+  }
+};
+
+module.exports = { createServer ,getServers,getChannelsByServer,createTextChannel,createVoiceChannel,getServerMembers,joinServerViaInvite};

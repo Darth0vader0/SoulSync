@@ -4,18 +4,17 @@ const cors = require("cors");
 const dotNet = require("dotenv");
 const http = require("http");
 dotNet.config();
-const Channel = require('./models/channel.model')
+
 const app = express();
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const User = require('./models/User.model');
+
 
 const PORT = 3001;
-const {registerUser, loginUser,getUserData,getAllUsers} = require('./controllers/auth.controller')
+const {registerUser, loginUser,logout,getUserData,getAllUsers} = require('./controllers/auth.controller')
 const {sendMessageToDM,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
-
 const authMiddleware = require('./middleware/auth.middleware');
-const { createServer,getServers,getChannelsByServer,createTextChannel,createVoiceChannel,joinServerViaInvite } = require('./controllers/server.controller');
+const { createServer,getServers,getChannelsByServer,getServerMembers,createTextChannel,createVoiceChannel,joinServerViaInvite } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
 // Connect to MongoDB
 db();
@@ -60,15 +59,7 @@ app.post('/signup', registerUser)
 app.post('/login', loginUser)
 app.get('/getUserData',authMiddleware,getUserData)
 app.get('/getAllUsers',authMiddleware,getAllUsers)
-app.get('/logout',(req,res)=>{
-  res.clearCookie("jwt", {
-    httpOnly: true,
-    secure: true, 
-    sameSite: "Strict",
-    path: "/",
-});
-res.status(200).json({ message: "Logged out successfully" });
-})
+app.get('/logout',logout)
 
 //messages api
 app.get('/:senderId/:receiverId',authMiddleware,getMessages);
@@ -84,16 +75,7 @@ app.get('/getChannelsByServer',authMiddleware, getChannelsByServer);
 app.post('/createTextChannel',authMiddleware,createTextChannel)
 app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
 app.post("/joinServer",authMiddleware,joinServerViaInvite)
-
-app.get("/getUser", async (req, res) => {
-  try {
-    const user = await User.findById(req.query.userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({ success: true, user });
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
+app.get("/server/:serverId/members",getServerMembers);
 
 app.use((req,res,next) => {
   req.io=io;

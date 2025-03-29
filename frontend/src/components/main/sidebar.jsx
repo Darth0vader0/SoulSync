@@ -1,5 +1,5 @@
 "use client"
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import {
   Hash,
   Volume2,
@@ -39,14 +39,9 @@ import socket from "../../utils/socket"
 // Mock data
 
 
-const onlineUsers=
-[
-    { id: "1", username: "John Doe", status: "online" ,avatar :"JD"},
-    { id: "2", username: "Jane Smith", status: "away",avatar:"JS" },
-    { id: "3", username: "Bob Johnson", status: "online",avatar:"BJ" }
-  ]
 
-  const serverIconCSS = `
+
+const serverIconCSS = `
   .server-icon {
     min-height: 48px;
     min-width: 48px;
@@ -71,22 +66,22 @@ const onlineUsers=
     border-radius: 30%;
   }
   `
-  const styleSheet = document.createElement("style")
+const styleSheet = document.createElement("style")
 styleSheet.type = "text/css"
 styleSheet.innerText = serverIconCSS
 document.head.appendChild(styleSheet)
-export default function Sidebar({ setActiveChannel, activeChannel,activeUser,setActiveDmChat }) {
+export default function Sidebar({ setActiveChannel, activeChannel, activeUser, setActiveDmChat }) {
   const [servers, setServers] = useState([]);       // List of all servers
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
-
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [createServerDialogOpen, setCreateServerDialogOpen] = useState(false)
   const [joinServerDialogOpen, setJoinServerDialogOpen] = useState(false)
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
   const [isDmView, setIsDmView] = useState(false)
-
+  const [serverMembers, setServerMembers] = useState([]);
   const [directMessages, setDirectMessages] = useState([])
 
   useEffect(() => {
@@ -102,10 +97,10 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
 
         const result = await response.json();
         setServers(result.servers);
-        
+
         // ✅ Auto-select the first server if none is active
         if (result.servers.length > 0) {
-          setActiveServer(result.servers[0]);  
+          setActiveServer(result.servers[0]);
         }
       } catch (err) {
         console.error("Error fetching servers:", err.message);
@@ -117,58 +112,58 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
       setDirectMessages(data.filter(user => user._id !== activeUser._id))
     }
     ).catch((error) => {
-        console.error("Error fetching users:", error.message);
-    } )
-    
+      console.error("Error fetching users:", error.message);
+    })
+
   }, []);
 
   useEffect(() => {
     if (!activeUser || servers.length === 0) return;
-  
+
     const serverIds = servers.map(server => server._id);
-  
+
     // Emit userConnected when component mounts
     socket.emit("userConnected", { userId: activeUser._id, serverIds });
-  
+
     // Listen for real-time online users update
     const handleUpdateOnlineUsers = (data) => {
-      console.log("🔵 Active Users Per Server:", data);
+      setOnlineUsers(data);
     };
-  
+
     socket.on("updateOnlineUsers", handleUpdateOnlineUsers);
-  
+
     return () => {
       // Emit userDisconnected when component unmounts
       socket.emit("userDisconnected", { userId: activeUser._id, serverIds });
-  
+
       // Remove event listener to prevent memory leaks
       socket.off("updateOnlineUsers", handleUpdateOnlineUsers);
     };
   }, [activeUser, servers]);
-  
+
   const handleDmClick = () => {
     // Remove "active" class from all server icons
     document.querySelectorAll(".server-icon").forEach((btn) => {
       btn.classList.remove("active");
     });
-  
+
     // Set DM view active
     setActiveChannel(null);
     setIsDmView(true);
   };
 
 
-  const handleServerClick = async (server,event) => {
-    
+  const handleServerClick = async (server, event) => {
+
     document.querySelectorAll(".server-icon").forEach(btn => {
       btn.classList.remove("active");
     });
-  
+
     // Add "active" class to the clicked button
     event.currentTarget.classList.add("active");
 
 
- 
+
     setActiveServer(server); // Update active server
     setLoading(true);
     setTextChannels([]);  // Reset channels before fetching new ones
@@ -187,8 +182,8 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
 
         setTextChannels(text);
         setVoiceChannels(voice);
-        console.log("text",text)
-        console.log("voice",voice)
+        console.log("text", text)
+        console.log("voice", voice)
         // ✅ Auto-select the first text channel when switching servers
         if (text.length > 0) {
           setActiveChannel(text[0]);
@@ -196,15 +191,29 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
       } else {
         console.error("Error fetching channels:", data.message);
       }
+      // 🔹 Fetch Server Members
+      const membersResponse = await fetch(`https://soulsync-52q9.onrender.com/server/${server._id}/members`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const membersData = await membersResponse.json();
+      if (membersData.success) {
+        setServerMembers(membersData.members);
+      } else {
+        console.error("Error fetching members:", membersData.message);
+      }
+
     } catch (error) {
       console.error("Error fetching channels:", error);
     }
 
-    setTimeout(()=>{
+    setTimeout(() => {
       setLoading(false)
-    },1000)
+    }, 1000)
   }
-  async function getAllUsers (){
+  async function getAllUsers() {
     const response = await fetch("https://soulsync-52q9.onrender.com/getAllUsers", {
       method: "GET",
       credentials: "include",
@@ -245,7 +254,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
         <div className="flex h-full">
           {/* Server icons column */}
           <div className="flex w-[72px] flex-col items-center gap-2 overflow-y-auto bg-background p-2 py-4">
-          <Tooltip>
+            <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   className={`server-icon ${isDmView ? "active bg-primary" : "bg-muted"}`}
@@ -270,15 +279,15 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
               <TooltipContent side="right">Direct Messages</TooltipContent>
             </Tooltip>
             <Separator className="my-2 w-10" />
-            
+
             {servers.map(server => (
               <Tooltip key={server._id}>
                 <TooltipTrigger asChild>
                   <button
                     className={`server-icon`}
-                    onClick={(e) =>{setActiveDmChat(null);setIsDmView(false); handleServerClick(server,e)}}
+                    onClick={(e) => { setActiveDmChat(null); setIsDmView(false); handleServerClick(server, e) }}
                   >
-                    {server.name.slice(0,1)}
+                    {server.name.slice(0, 1)}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right">{server.name}</TooltipContent>
@@ -318,31 +327,34 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
               {/* add users to chat here ... */}
               {/* List of DM Users */}
               <div className="px-2 space-y-2">
-                {directMessages.map((user) => (
-                  <button
-                    key={user._id}
-                    className="flex items-center w-full p-2 rounded-md hover:bg-[#2f3136] transition"
-                    // Set active DM chat
-                    onClick={() => setActiveDmChat(user)}
-                  >
-                    {/* Avatar */}
-                    <div className="relative">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={user.username} />
-                        <AvatarFallback>{user.username.slice(0, 1)}</AvatarFallback>
-                      </Avatar>
-                      <div
-                        className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card ${getStatusColor(user.status)}`}
-                      ></div>
-                    </div>
+                {directMessages.map((user) => {
+                  const isOnline = onlineUsers.includes(user._id);
 
-                    {/* Username & Last Message Preview */}
-                    <div className="ml-3 flex flex-col text-left">
-                      <span className="text-sm font-medium">{user.username}</span>
+                  return (
+                    <button
+                      key={user._id} // ✅ Ensures uniqueness
+                      className="flex items-center w-full p-2 rounded-md hover:bg-[#2f3136] transition"
+                      onClick={() => setActiveDmChat(user)}
+                    >
+                      {/* Avatar */}
+                      <div className="relative">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={user.username} />
+                          <AvatarFallback>{user.username.slice(0, 1)}</AvatarFallback>
+                        </Avatar>
+                        {isOnline && (
+                          <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-green-500"></div>
+                        )}
+                      </div>
 
-                    </div>
-                  </button>
-                ))}
+                      {/* Username */}
+                      <div className="ml-3 flex flex-col text-left">
+                        <span className="text-sm font-medium">{user.username}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+
               </div>
             </div> : activeChannel === null ? (
               <>
@@ -353,7 +365,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                   <p className="max-w-sm text-sm text-gray-300">
                     Choose a server from the sidebar or <br /> create a new one to start chatting.
                   </p>
-                 
+
                 </div>
               </>
             ) :
@@ -443,27 +455,30 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                       </SidebarGroupLabel>
                       <SidebarGroupContent>
                         <SidebarMenu>
-                          {onlineUsers.map(user => (
-                            <SidebarMenuItem key={user.id}>
-                              <SidebarMenuButton>
-                                <div className="relative mr-2">
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarImage
-                                      src={`/placeholder.svg?height=24&width=24`}
-                                      alt={user.name}
-                                    />
-                                    <AvatarFallback>{user.avatar}</AvatarFallback>
-                                  </Avatar>
-                                  <div
-                                    className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card ${getStatusColor(
-                                      user.status
-                                    )}`}
-                                  ></div>
-                                </div>
-                                <span>{user.username}</span>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          ))}
+                          {serverMembers.map(member => {
+                            // Check if the member is online
+                            const isOnline = onlineUsers.includes(member._id);
+                            return (
+                              <SidebarMenuItem key={member._id}>
+                                <SidebarMenuButton>
+                                  <div className="relative mr-2">
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarImage
+                                        src={`/placeholder.svg?height=24&width=24`}
+                                        alt={member.username.slice(0, 1)}
+                                      />
+                                      <AvatarFallback>{member.username.slice(0, 1)}</AvatarFallback>
+                                    </Avatar>
+                                    {/* Show green tick for online users */}
+                                    {isOnline && (
+                                      <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-green-500"></div>
+                                    )}
+                                  </div>
+                                  <span>{member.username}</span>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+                            );
+                          })}
                         </SidebarMenu>
                       </SidebarGroupContent>
                     </SidebarGroup>
@@ -474,8 +489,8 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
             }
           </SidebarContent>
         </div>
-         {/* Create Server Dialog */}
-         <Dialog open={createServerDialogOpen} onOpenChange={setCreateServerDialogOpen}>
+        {/* Create Server Dialog */}
+        <Dialog open={createServerDialogOpen} onOpenChange={setCreateServerDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Create a new server</DialogTitle>
@@ -555,7 +570,7 @@ export default function Sidebar({ setActiveChannel, activeChannel,activeUser,set
                   const result = await response.json()
                   if (result.success) {
                     // Add the joined server to the list
-                    setServers((newServer)=>[...newServer, result.server])
+                    setServers((newServer) => [...newServer, result.server])
                     setJoinServerDialogOpen(false)
                   }
                 } catch (error) {
