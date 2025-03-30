@@ -1,23 +1,7 @@
 const {Message,GcMessages} = require("../models/message.model");
-const jwt =require('jsonwebtoken');
 
-// Send a message
-const sendMessageToDM = async (req, res) => {
-  try {
-    const { senderId, receiverId, message } = req.body;
-    
-    const newMessage = new Message({
-      senderId,
-      receiverId,
-      message,
-    });
 
-    await newMessage.save();
-    res.status(201).json({ success: true, message: "Message sent successfully", data: newMessage });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Server error", error });
-  }
-};
+
 
 // Get all messages from a channel
 
@@ -74,4 +58,4 @@ const getMessages = async (req, res) => {
   }
 };
 
-module.exports = { sendMessageToDM, getMessages ,sendMessageToChannel,getChannelMessages};
+module.exports = { getMessages ,sendMessageToChannel,getChannelMessages};

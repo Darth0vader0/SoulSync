@@ -10,11 +10,6 @@ import { Input } from "../ui/input";
 import { Separator } from "../ui/separator"
 import socket from "../../utils/socket";
 
-// Format time (HH:MM)
-const formatTime = (date) => {
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-};
-
 // Format date (Today, Yesterday, or Full Date)
 const formatDate = (date) => {
   if (!(date instanceof Date)) {
@@ -41,7 +36,6 @@ function DmChatBox({ activeUser, selectedUser }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
-
   useEffect(() => {
     socket.emit("userConnectedToDm", activeUser._id);
   }, [activeUser._id]);
@@ -49,11 +43,7 @@ function DmChatBox({ activeUser, selectedUser }) {
   useEffect(() => {
     const fetchedMessages = async () => {
       try {
-        const response = await fetch(`https://soulsync-52q9.onrender.com/${activeUser._id}/${selectedUser._id}`,{
-          method: "GET",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        });
+        const response = await fetch(`https://soulsync-52q9.onrender.com/${activeUser._id}/${selectedUser._id}`);
         const data = await response.json();
         console.log(data);
         setMessages(data.data);
@@ -71,6 +61,7 @@ function DmChatBox({ activeUser, selectedUser }) {
     socket.emit("joinDm", selectedUser._id);
 
     const handleReceiveMessage = (message) => {
+      console.log(message)
       // Only add message if it's for the current chat
       if (
         (message.senderId === activeUser._id && message.receiverId === selectedUser._id) ||
@@ -87,6 +78,29 @@ function DmChatBox({ activeUser, selectedUser }) {
     };
   }, [selectedUser, activeUser]);
 
+  useEffect(() => {
+    if (messages.length > 0) {
+      messages.forEach((msg) => {
+        if (!msg.read && msg.receiverId === activeUser._id) {
+          socket.emit("messageRead", { messageId: msg._id, senderId: msg.senderId });
+        }
+      });
+    }
+  }, [messages, activeUser._id]);
+
+  useEffect(() => {
+    socket.on("messageReadUpdate", ({ messageId }) => {
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === messageId ? { ...msg, read: true } : msg
+        )
+      );
+      console.log("message updated")
+    });
+
+    return () => socket.off("messageReadUpdate");
+  }, []);
+
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -100,34 +114,16 @@ function DmChatBox({ activeUser, selectedUser }) {
     const messageContent = newMessage.trim();
     const message = {
       id: Date.now().toString(),
-      content: newMessage.trim(),
+      message: messageContent,
       senderId: activeUser._id,
       receiverId: selectedUser._id,
       timestamp: new Date().toISOString()
     };
 
-    // Emit message through socket
-    socket.emit('sendMessage', message);
-    setNewMessage("");
-    //add message to database
-    const response = await fetch("https://soulsync-52q9.onrender.com/sendMessageToDM", {
-      method: "POST",
-      credentials: "include", // Important for cookies
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        senderId: activeUser?._id,
-        receiverId: selectedUser?._id,
-        message: messageContent
-      })
-    })
 
-    const data = await response.json()
-    if (!data.success) {
-      console.error("Error sending message:", data.message)
-      return
-    }
+    setNewMessage("");
+    // Emit message through socket
+    socket.emit('sendMessageInDm', message);
 
   };
   // Group messages by date
@@ -164,6 +160,7 @@ function DmChatBox({ activeUser, selectedUser }) {
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 scrollbar-hide">
+
           {groupedMessages.map((group, groupIndex) => (
             <div key={groupIndex} className="mb-4">
               <div className="relative mb-4 flex items-center">
@@ -173,25 +170,59 @@ function DmChatBox({ activeUser, selectedUser }) {
                 </span>
               </div>
 
-              {group.messages.map((message) => (
-                <div key={message._id} className={`mb-4 flex ${message.senderId === activeUser._id ? "justify-end" : "justify-start"}`}>
-                  <div className="flex items-start gap-3">
-                    {message.senderId !== activeUser._id && (
-                      <Avatar>
-                        <AvatarImage src="/placeholder.svg?height=40&width=40" alt={selectedUser?.username} />
-                        <AvatarFallback>{selectedUser?.username?.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div className={`p-2 rounded-lg ${message.senderId === activeUser._id ? "bg-blue-600 text-white" : "bg-purple-400 text-white"}`}>
-                      {message.message || message.content}
+              {group.messages.map((message, index) => {
+                const isLastSentMessage =
+                  message.senderId === activeUser._id && index === group.messages.length - 1;
+
+                return (
+                  <div
+                    key={message._id || message.id}
+                    className={`mb-4 flex ${message.senderId === activeUser._id ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className="flex flex-col items-end">
+                      <div className="flex items-start gap-3">
+                        {message.senderId !== activeUser._id && (
+                          <Avatar>
+                            <AvatarImage src="/placeholder.svg?height=40&width=40" alt={selectedUser?.username} />
+                            <AvatarFallback>{selectedUser?.username?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div className={`p-3 rounded-2xl max-w-xs ${message.senderId === activeUser._id ? "bg-blue-600 text-white" : "bg-purple-400 text-white"}`}>
+                          {message.message || message.content}
+                        </div>
+                      </div>
+
+                      {/* Instagram-style read receipt */}
+                      {isLastSentMessage && (
+                        <div className="flex items-center mt-1 mr-2">
+                          <span className="text-xs text-gray-500 mr-1">
+                            {message.read ? "Seen" : "Sent"}
+                          </span>
+                          {message.read ? (
+                            <Avatar className="h-3 w-3">
+                              <AvatarImage
+                                src={selectedUser?.profilePic || "/placeholder.svg?height=12&width=12"}
+                                alt={selectedUser?.username}
+                                className="h-full w-full object-cover"
+                              />
+                              <AvatarFallback>{selectedUser?.username?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <div className="h-2 w-2 rounded-full bg-gray-400"></div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
+
+
         {/* Message Input */}
         <div className="border-t border-border p-4">
           <form onSubmit={handleSendMessage} className="flex items-center gap-2">

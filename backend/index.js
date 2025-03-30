@@ -12,7 +12,7 @@ const { Server } = require("socket.io");
 
 const PORT = 3001;
 const {registerUser, loginUser,logout,getUserData,getAllUsers} = require('./controllers/auth.controller')
-const {sendMessageToDM,getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
+const {getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 const authMiddleware = require('./middleware/auth.middleware');
 const { createServer,getServers,getChannelsByServer,getServerMembers,createTextChannel,createVoiceChannel,joinServerViaInvite } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
@@ -63,7 +63,6 @@ app.get('/logout',logout)
 
 //messages api
 app.get('/:senderId/:receiverId',authMiddleware,getMessages);
-app.post('/sendMessageToDm',authMiddleware,sendMessageToDM);
 app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
 app.get("/getChannelMessages",authMiddleware,getChannelMessages)
 

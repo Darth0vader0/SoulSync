@@ -1,4 +1,6 @@
 const connectedUsersInDm = new Map();
+const { Message } = require('../models/message.model')
+
 
 const DmSocket = (io) => {
   io.on('connection', (socket) => {
@@ -29,13 +31,28 @@ const DmSocket = (io) => {
     });
 
     // Handle sending a message
-    socket.on('sendMessage', (message) => {
-      const { receiverId } = message;
+    socket.on('sendMessageInDm', async (messageData) => {
+      try {
+        const { senderId, receiverId, message } = messageData;
 
-      // Send message to the correct room (userId-based)
-      io.to(receiverId).emit("receiveMessage", message);
-      
-      console.log('Message sent:', message);
+        // Save message in the database
+        const newMessage = new Message({ senderId, receiverId, message });
+        await newMessage.save();
+        // Emit message to receiver's room
+        io.to(receiverId).emit("receiveMessage", newMessage);
+        console.log("Message sent:", newMessage);
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    });
+    // read messages
+    socket.on("messageRead", async ({ messageId, senderId }) => {
+      try {
+        await Message.findByIdAndUpdate(messageId, { read: true });
+        io.to(senderId).emit("messageReadUpdate", { messageId });
+      } catch (error) {
+        console.error("Error updating read status:", error);
+      }
     });
   });
 };
