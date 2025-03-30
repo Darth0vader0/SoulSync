@@ -43,7 +43,13 @@ function DmChatBox({ activeUser, selectedUser }) {
   useEffect(() => {
     const fetchedMessages = async () => {
       try {
-        const response = await fetch(`https://soulsync-52q9.onrender.com/${activeUser._id}/${selectedUser._id}`);
+        const response = await fetch(`https://soulsync-52q9.onrender.com/${activeUser._id}/${selectedUser._id}`,
+          {
+            method :"GET",
+            credentials:"include",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
         const data = await response.json();
         console.log(data);
         setMessages(data.data);

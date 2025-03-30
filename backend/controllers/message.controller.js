@@ -1,8 +1,5 @@
 const {Message,GcMessages} = require("../models/message.model");
 
-
-
-
 // Get all messages from a channel
 
 const getChannelMessages = async (req, res) => {
