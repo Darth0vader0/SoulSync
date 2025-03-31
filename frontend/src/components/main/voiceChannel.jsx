@@ -1,9 +1,14 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useRef } from "react"
+import { useState, useEffect } from "react"
 import {
   Mic,
   MicOff,
+  Headphones,
   Volume2,
+  Video,
+  VideoOff,
+  ScreenShare,
   PhoneOff,
   Settings,
   Users
@@ -11,37 +16,50 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
   TooltipProvider
 } from "../ui/tooltip"
+import { Slider } from "../ui/slider"
 import socket from "../../utils/socket"
 
-export default function VoiceChannelUI({ activeChannel, activeServerData, setActiveChannel, activeUser }) {
-  const [isMuted, setIsMuted] = useState(false)
-  const [connectedUsers, setConnectedUsers] = useState([])
+export default function VoiceChannelUI({ activeChannel, setActiveChannel, activeUser }) {
+  const [isMuted, setIsMuted] = useState(false);
+  const [isDeafened, setIsDeafened] = useState(false);
+  const [hasVideo, setHasVideo] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [volume, setVolume] = useState([50]);
+  const [connectedUsers, setConnectedUsers] = useState([]);
   const localStreamRef = useRef(null)
   const remoteStreamRef = useRef(null)
   const peerConnectionRef = useRef(null)
 
+  // Handle mute state changes
   useEffect(() => {
-    // Join the channel
-    socket.emit("join-channel", {
-      channelId: activeChannel._id,
-      userId: activeUser._id,
-      userInfo: { username: activeUser.username }
-    })
+    socket.emit("audio-status-change", { isMuted });
+  }, [isMuted]);
 
-    // Listen for users joining the channel
-    socket.on("user-joined", ({ userId, userInfo }) => {
-      setConnectedUsers((prev) => [...prev, { id: userId, ...userInfo }])
-    })
+  // Handle updated user list
+  useEffect(() => {
+    socket.on("userList", (users) => {
+      setConnectedUsers(users);
+    });
 
-    // Listen for users leaving the channel
-    socket.on("user-left", ({ userId }) => {
-      setConnectedUsers((prev) => prev.filter((user) => user.id !== userId))
-    })
+    return () => {
+      socket.off("userList");
+    };
+  }, []);
 
-    // Initialize WebRTC connection
-    const peerConnection = new RTCPeerConnection({
+  // Handle joining/leaving voice channels
+  useEffect(() => {
+    if (!activeUser || !activeChannel) return;
+
+    // Join the new channel
+    socket.emit("joinVoiceChannel", { channelId: activeChannel._id, user: activeUser });
+
+     // Initialize WebRTC connection
+     const peerConnection = new RTCPeerConnection({
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" } // Public STUN server
       ]
@@ -80,18 +98,21 @@ export default function VoiceChannelUI({ activeChannel, activeServerData, setAct
       }
     })
 
+
+    // Handle disconnect (tab close, refresh)
+    const handleBeforeUnload = () => {
+      socket.emit("leaveVoiceChannel", { user: activeUser });
+    };
+    
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
-      // Cleanup on component unmount
-      peerConnection.close()
-      socket.emit("leave-channel", { channelId: activeChannel._id })
-      socket.off("user-joined")
-      socket.off("user-left")
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       socket.off("offer")
       socket.off("answer")
       socket.off("ice-candidate")
-    }
-  }, [activeChannel._id, activeUser._id, activeUser.username])
-
+    };
+  }, [activeChannel, activeUser,activeChannel._id, activeUser._id, activeUser.username]);
   const handleStartAudio = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -116,8 +137,10 @@ export default function VoiceChannelUI({ activeChannel, activeServerData, setAct
       peerConnectionRef.current.close()
     }
     socket.emit("leave-channel", { channelId: activeChannel._id })
+    setActiveChannel(null);
   }
 
+ 
   return (
     <TooltipProvider>
       <div className="flex h-full flex-col">
@@ -144,28 +167,83 @@ export default function VoiceChannelUI({ activeChannel, activeServerData, setAct
           <div className="flex-1 overflow-y-auto p-4">
             <h3 className="mb-4 text-lg font-semibold">Connected Users</h3>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {connectedUsers.map(user => (
+              {connectedUsers.map((user) => (
                 <div
                   key={user.id}
                   className="relative flex flex-col items-center rounded-lg border border-border bg-card p-4"
                 >
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage
-                      src={`/placeholder.svg?height=80&width=80`}
-                      alt={user.username}
-                    />
-                    <AvatarFallback className="text-xl">
-                      {user.username?.substring(0, 2).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative mb-2">
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage
+                        src={`/placeholder.svg?height=80&width=80`}
+                        alt={user.username}
+                      />
+                      <AvatarFallback className="text-xl">
+                        {user.username?.substring(0, 2).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    {user.isSpeaking && (
+                      <div className="absolute inset-0 animate-pulse rounded-full border-2 border-green-500"></div>
+                    )}
+                    <div className="absolute -bottom-1 -right-1 flex gap-1">
+                      {user.isMuted && (
+                        <div className="rounded-full bg-destructive p-1">
+                          <MicOff className="h-3 w-3" />
+                        </div>
+                      )}
+                      {user.isDeafened && (
+                        <div className="rounded-full bg-destructive p-1">
+                          <Headphones className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <span className="font-medium">{user.username}</span>
+                  <div className="mt-2 flex items-center gap-2">
+                    {user.hasVideo && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="rounded-full bg-primary p-1">
+                            <Video className="h-3 w-3" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>Video On</TooltipContent>
+                      </Tooltip>
+                    )}
+                    {user.isScreenSharing && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="rounded-full bg-primary p-1">
+                            <ScreenShare className="h-3 w-3" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>Sharing Screen</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Audio controls */}
-          <div className="flex items-center justify-center gap-2 border-t border-border p-4">
+          {/* Volume control */}
+          <div className="px-4 py-2 border-t border-border">
+            <div className="flex items-center gap-4">
+              <Volume2 className="h-4 w-4 text-muted-foreground" />
+              <Slider
+                className="flex-1"
+                value={volume}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={setVolume}
+              />
+              <span className="w-8 text-sm text-muted-foreground">{volume}%</span>
+            </div>
+          </div>
+
+           {/* Audio controls */}
+           <div className="flex items-center justify-center gap-2 border-t border-border p-4">
             <Button
               variant={isMuted ? "destructive" : "secondary"}
               size="icon"
@@ -179,10 +257,9 @@ export default function VoiceChannelUI({ activeChannel, activeServerData, setAct
           </div>
         </div>
 
-        {/* Audio elements */}
-        <audio ref={localStreamRef} autoPlay muted />
-        <audio ref={remoteStreamRef} autoPlay />
+        <audio ref={localStreamRef} autoPlay muted></audio>
+        <audio ref={remoteStreamRef} autoPlay></audio>
       </div>
     </TooltipProvider>
-  )
+  );
 }
