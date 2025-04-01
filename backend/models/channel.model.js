@@ -9,7 +9,7 @@ const channelSchema = new Schema({
     },
     type: {
       type: String,
-      enum: ['text', 'voice'],
+      enum: ['text', 'voice','resources'],
       required: true,
     },
     serverId: {

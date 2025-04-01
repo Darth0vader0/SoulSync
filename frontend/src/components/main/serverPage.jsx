@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Sidebar from "./sidebar"
 import ChatBox from "./chatBox"
 import VoiceChannelUI from "./voiceChannel"
+import ResourceSharingBox from "./resources"
 import DM from "./DM"  // Import the DM component
 import image from "../../assets/image-removebg-preview.png";
 import { Skeleton } from "../ui/skeleton"
@@ -92,8 +93,11 @@ export default function ServerPage() {
         ) : activeChannel ? (
           activeChannel.type === "text" ? (
             <ChatBox activeChannel={activeChannel} activeUser={user} />
-          ) : (
+          ) : activeChannel.type==='voice'?(
             <VoiceChannelUI activeChannel={activeChannel} setActiveChannel={setActiveChannel} activerServerData={activerServerData} activeUser={user} />
+          ):
+          (
+            <ResourceSharingBox />
           )
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">

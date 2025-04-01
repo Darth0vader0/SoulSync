@@ -7,7 +7,8 @@ import {
   UserPlus,
   Settings,
   Users,
-  ChevronDown
+  ChevronDown,
+  Folder
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Button } from "../ui/button"
@@ -75,6 +76,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
+  const [resourcesChannels,setResourcesChannels]=useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [createServerDialogOpen, setCreateServerDialogOpen] = useState(false)
@@ -179,9 +181,11 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
       if (data.success) {
         const text = data.channels.filter(channel => channel.type === "text");
         const voice = data.channels.filter(channel => channel.type === "voice");
-
+        const resources = data.channels.filter(channel=>channel.type ==='resources')
         setTextChannels(text);
         setVoiceChannels(voice);
+        setResourcesChannels(resources);
+
         console.log("text", text)
         console.log("voice", voice)
         // ✅ Auto-select the first text channel when switching servers
@@ -235,18 +239,6 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
     setInviteDialogOpen(true)
   }
 
-  const getStatusColor = status => {
-    switch (status) {
-      case "online":
-        return "bg-green-500"
-      case "idle":
-        return "bg-yellow-500"
-      case "dnd":
-        return "bg-red-500"
-      default:
-        return "bg-gray-500"
-    }
-  }
 
   return (
     <TooltipProvider>
@@ -438,6 +430,34 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
                                 onClick={() => handleChannelClick(channel)}
                               >
                                 <Volume2 className="mr-2 h-4 w-4" />
+                                <span>{channel.name}</span>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))
+                        }
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                  <SidebarGroup>
+                    <SidebarGroupLabel className="flex items-center px-2 py-1">
+                      <ChevronDown className="mr-1 h-3 w-3" />
+                      RESOURCES
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {loading ?
+                          <div className="mt-4 space-y-3 animate-pulse">
+                            {[...Array(4)].map((_, index) => (
+                              <Skeleton key={index} className="h-6 w-40 rounded-md" />
+                            ))}
+                          </div> :
+                          resourcesChannels.map(channel => (
+                            <SidebarMenuItem key={channel._id}>
+                              <SidebarMenuButton
+                                isActive={activeChannel._id === channel._id}
+                                onClick={() => handleChannelClick(channel)}
+                              >
+                                <Folder className="mr-2 h-4 w-4" />
                                 <span>{channel.name}</span>
                               </SidebarMenuButton>
                             </SidebarMenuItem>

@@ -42,12 +42,18 @@ const createServer = async (req, res) => {
       type: 'voice',
       serverId: newServer._id,
     });
+    const resources = new Channel({
+      name: 'resources',
+      type: 'resources',
+      serverId: newServer._id,
+    });
 
     await generalTextChannel.save();
     await generalVoiceChannel.save();
+    await resources.save();
 
     // Update server with created channels
-    newServer.channels = [generalTextChannel._id, generalVoiceChannel._id];
+    newServer.channels = [generalTextChannel._id, generalVoiceChannel._id,resources._id];
     await newServer.save();
     
     return res.status(201).json({
