@@ -14,6 +14,7 @@ const PORT = 3001;
 const {registerUser, loginUser,logout,getUserData,getAllUsers} = require('./controllers/auth.controller')
 const {getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 const authMiddleware = require('./middleware/auth.middleware');
+const {uploadMiddleware} = require('./middleware/attachments.middleware');
 const { createServer,getServers,getChannelsByServer,getServerMembers,createTextChannel,createVoiceChannel,joinServerViaInvite } = require('./controllers/server.controller');
 const cookieParse = require('cookie-parser');
 // Connect to MongoDB
@@ -76,6 +77,9 @@ app.post('/createVoiceChannel',authMiddleware,createVoiceChannel)
 app.post("/joinServer",authMiddleware,joinServerViaInvite)
 app.get("/server/:serverId/members",getServerMembers);
 
+
+//attachments routes
+app.post("/sendAttachments",authMiddleware,uploadMiddleware,sendAttachments);
 app.use((req,res,next) => {
   req.io=io;
   next();
