@@ -34,6 +34,8 @@ const sendAttachments = async (req, res) => {
         });
 
         const savedMessage = await newMessage.save();
+        const io = req.app.get("io"); // Get the io instance from the app
+        io.to(chatId).emit("messageReceived", savedMessage); // Emit the message to the channel
         res.status(201).json(savedMessage);
     } catch (error) {
         console.error("Error sending message:", error);

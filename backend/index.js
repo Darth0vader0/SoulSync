@@ -34,10 +34,11 @@ const io = new Server(server, {
 const setupSocket = require("./config/soket");
 const setupVoiceSocket = require("./config/voiceSocket");
 const DmSocket = require("./config/DmSocket");  
+const attachmentsSocket = require("./config/attachmentSocket");
 setupSocket(io);        // Messaging
 setupVoiceSocket(io);  // Voice Channels
 DmSocket(io);    // Direct Messaging
-
+attachmentsSocket(io); // Attachments
 
 app.use(cors({ 
 
@@ -82,6 +83,7 @@ app.get("/server/:serverId/members",getServerMembers);
 //attachments routes
 app.post("/sendAttachments",authMiddleware,uploadMiddleware,sendAttachments);
 app.get("/getAttachments",authMiddleware,getAttachments);
+app.set("io",io);
 app.use((req,res,next) => {
   req.io=io;
   next();

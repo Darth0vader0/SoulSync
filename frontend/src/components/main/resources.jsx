@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
-
+import socket from "../../utils/socket"
 // Format time to "hh:mm AM/PM"
 const formatTime = (date) => {
   return new Date(date).toLocaleTimeString([], {
@@ -212,6 +212,67 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
     }
   };
 
+  useEffect(() => {
+    if (selectedChannel?._id && activeUser?._id) {
+      // Emit user connection to the channel
+      socket.emit("userConnectedToAttachmentChannel", {
+        userId: activeUser._id,
+        channelId: selectedChannel._id,
+      });
+      
+      console.log(
+        `User ${activeUser._id} connected to channel ${selectedChannel._id}`
+      );
+  
+      // Listen for new messages in real-time
+      socket.on("receiveMessage", (newMessage) => {
+        console.log("New message received:", newMessage);
+  
+        // Format the received message
+        const fileExtension = newMessage.attachmentUrl
+          ? newMessage.attachmentUrl.split(".").pop().toLowerCase()
+          : "";
+        let type = "file"; // Default type
+  
+        // Determine the type based on the file extension
+        if (["png", "jpg", "jpeg", "gif", "bmp", "webp"].includes(fileExtension)) {
+          type = "image";
+        } else if (
+          ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"].includes(fileExtension)
+        ) {
+          type = "video";
+        } else if (["mp3", "wav", "aac", "flac", "ogg"].includes(fileExtension)) {
+          type = "audio";
+        } else if (fileExtension === "pdf") {
+          type = "pdf";
+        }
+  
+        // Add the new message to the resources state
+        setResources((prev) => [
+          ...prev,
+          {
+            id: newMessage._id,
+            type, // Use the determined type
+            name: newMessage.attachmentUrl || "Untitled",
+            senderName: newMessage.sender?.username || "Unknown",
+            timestamp: newMessage.createdAt,
+            imageUrl: newMessage.attachmentUrl || null,
+            text: newMessage.text,
+            loading: false,
+          },
+        ]);
+      });
+    }
+  
+    // Cleanup: Emit leaveChannel and remove socket listener
+    return () => {
+      if (selectedChannel?._id) {
+        socket.emit("leaveChannel", selectedChannel._id);
+        console.log(`User left channel ${selectedChannel._id}`);
+      }
+      socket.off("receiveMessage"); // Remove the listener to avoid memory leaks
+    };
+  }, [selectedChannel, activeUser]);
   // Fetch messages when the selected channel changes
   useEffect(() => {
     fetchMessages();
