@@ -118,7 +118,6 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
       const response = await fetch("https://soulsync-52q9.onrender.com/sendAttachments", {
         method: "POST",
         body: formData,
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
       const data = await response.json();
@@ -170,7 +169,6 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
         {
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
         }
       );
       const data = await response.json();
