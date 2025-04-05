@@ -274,7 +274,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
         socket.emit("leaveChannel", selectedChannel._id);
         console.log(`User left channel ${selectedChannel._id}`);
       }
-      socket.off("receiveMessage"); // Remove the listener to avoid memory leaks
+      socket.off("messageReceived"); // Remove the listener to avoid memory leaks
     };
   }, [selectedChannel, activeUser]);
 
