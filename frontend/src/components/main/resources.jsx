@@ -229,7 +229,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
       );
 
       // Listen for new messages in real-time
-      socket.on("receiveMessage", (newMessage) => {
+      socket.on("messageReceived", (newMessage) => {
         console.log("New message received:", newMessage);
 
         // Format the received message
