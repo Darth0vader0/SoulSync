@@ -44,8 +44,7 @@ const sendAttachments = async (req, res) => {
 };
 
 // ✅ Get All Messages for a Channel
-const getAttachments = async (req, res) => {
-    console.log("Request q:", req.query); // Debugging
+const getAttachments = async (req, res) => { 
     try {
         // Fetch messages for the given channelId
         const messages = await attachments.find({ chatId: req.query.channelId })

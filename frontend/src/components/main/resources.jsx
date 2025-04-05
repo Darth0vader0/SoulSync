@@ -118,9 +118,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
       const response = await fetch("https://soulsync-52q9.onrender.com/sendAttachments", {
         method: "POST",
         body: formData,
-        headers: {
-          "Content-Type": "application/json", // Do not set Content-Type for FormData, browser will set it automatically
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
       const data = await response.json();
@@ -172,9 +170,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
         {
           method: "GET",
           credentials: "include",
-          headers:{
-            "Content-Type": "application/json",
-          }
+          headers: { "Content-Type": "application/json" },
         }
       );
       const data = await response.json();
@@ -219,27 +215,31 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
   };
 
   useEffect(() => {
+    fetchMessages();
+  }, [selectedChannel]);
+
+  useEffect(() => {
     if (selectedChannel?._id && activeUser?._id) {
       // Emit user connection to the channel
       socket.emit("userConnectedToAttachmentChannel", {
         userId: activeUser._id,
         channelId: selectedChannel._id,
       });
-      
+
       console.log(
         `User ${activeUser._id} connected to channel ${selectedChannel._id}`
       );
-  
+
       // Listen for new messages in real-time
       socket.on("receiveMessage", (newMessage) => {
         console.log("New message received:", newMessage);
-  
+
         // Format the received message
         const fileExtension = newMessage.attachmentUrl
           ? newMessage.attachmentUrl.split(".").pop().toLowerCase()
           : "";
         let type = "file"; // Default type
-  
+
         // Determine the type based on the file extension
         if (["png", "jpg", "jpeg", "gif", "bmp", "webp"].includes(fileExtension)) {
           type = "image";
@@ -252,7 +252,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
         } else if (fileExtension === "pdf") {
           type = "pdf";
         }
-  
+
         // Add the new message to the resources state
         setResources((prev) => [
           ...prev,
@@ -269,7 +269,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
         ]);
       });
     }
-  
+
     // Cleanup: Emit leaveChannel and remove socket listener
     return () => {
       if (selectedChannel?._id) {
@@ -279,10 +279,6 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
       socket.off("receiveMessage"); // Remove the listener to avoid memory leaks
     };
   }, [selectedChannel, activeUser]);
-  // Fetch messages when the selected channel changes
-  useEffect(() => {
-    fetchMessages();
-  }, [selectedChannel]);
 
   // Smooth scroll to the latest message
   useEffect(() => {
@@ -354,8 +350,6 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
         ))}
         <div ref={messagesEndRef} />
       </div>
-
-  
       {/* Input Section */}
       <div className="border-t p-4">
         <form onSubmit={handleSendResource} className="flex flex-col gap-2">
