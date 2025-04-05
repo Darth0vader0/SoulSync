@@ -97,7 +97,7 @@ export default function ServerPage() {
             <VoiceChannelUI activeChannel={activeChannel} setActiveChannel={setActiveChannel} activerServerData={activerServerData} activeUser={user} />
           ):
           (
-            <ResourceSharingBox />
+            <ResourceSharingBox  selectedChannel={activeChannel} activeUser={user} />
           )
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
