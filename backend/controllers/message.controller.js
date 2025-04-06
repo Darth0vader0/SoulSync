@@ -21,8 +21,6 @@ const getChannelMessages = async (req, res) => {
 const sendMessageToChannel = async (req, res) => {
   try {
     const { channelId, content } = req.body;
-
-     
     const newMessage = new GcMessages({
       senderId: req.user.userId,
       senderUsername: req.user.username,

@@ -31,7 +31,7 @@ const uploadMiddleware = (req, res, next) => {
             console.error("Multer error:", err);
             return res.status(500).json({ error: "Multer Error", details: err.message });
         }
-        console.log("File Uploaded Successfully:", req.file);
+        
         next();
     });
 };

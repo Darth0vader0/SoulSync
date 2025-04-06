@@ -186,8 +186,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
         setVoiceChannels(voice);
         setResourcesChannels(resources);
 
-        console.log("text", text)
-        console.log("voice", voice)
+       
         // ✅ Auto-select the first text channel when switching servers
         if (text.length > 0) {
           setActiveChannel(text[0]);

@@ -42,10 +42,7 @@ const getAllUsers = async (req,res)=>{
 // Login User
 const loginUser = async (req, res) => {
  
-  
-  try {
-
-    
+  try {    
     const { email, password } = req.body;
     
     // Check if user exists

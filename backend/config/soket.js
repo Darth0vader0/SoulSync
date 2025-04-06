@@ -18,11 +18,9 @@ const handleUserConnected = (socket, io, { userId, serverIds }) => {
     io.to(serverId).emit("updateOnlineUsers", Array.from(onlineUsersPerServer.get(serverId)));
   });
 
-  console.log(`🔹 User ${userId} connected on socket ${socket.id}`);
 };
 
 const handleUserDisconnected = (socket, io) => {
-  console.log(`❌ Chat user ${socket.id} disconnected`);
 
   let disconnectedUserId = null;
 
@@ -50,19 +48,16 @@ const handleUserDisconnected = (socket, io) => {
     }
   }
 
-  console.log(`✅ Updated Online Users:`, Array.from(onlineUsers.keys()));
 };
 
 const setupSocket = (io) => {
   io.on("connection", (socket) => {
-    console.log(`💬 User connected for chat: ${socket.id}`);
 
     socket.on("userConnected", (data) => handleUserConnected(socket, io, data));
     socket.on("disconnect", () => handleUserDisconnected(socket, io));
 
     socket.on("joinChannel", (channelId) => {
       socket.join(channelId);
-      console.log(`User ${socket.id} joined channel ${channelId}`);
     });
 
     socket.on("sendMessage", (message) => {

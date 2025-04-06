@@ -3,10 +3,7 @@ const Channel = require('../models/channel.model'); // Import Channel model (for
 const jwt = require('jsonwebtoken');
 // Create a new server
 const createServer = async (req, res) => {
-  console.log("into");
-  console.log("next");
-  
-  
+  // Check if user is authenticated
   try {
     const { name } = req.body;
     if (!name) {

@@ -51,7 +51,7 @@ function DmChatBox({ activeUser, selectedUser }) {
           }
         );
         const data = await response.json();
-        console.log(data);
+        
         setMessages(data.data);
 
       } catch (error) {
@@ -67,7 +67,7 @@ function DmChatBox({ activeUser, selectedUser }) {
     socket.emit("joinDm", selectedUser._id);
 
     const handleReceiveMessage = (message) => {
-      console.log(message)
+      
       // Only add message if it's for the current chat
       if (
         (message.senderId === activeUser._id && message.receiverId === selectedUser._id) ||
@@ -101,7 +101,7 @@ function DmChatBox({ activeUser, selectedUser }) {
           msg._id === messageId ? { ...msg, read: true } : msg
         )
       );
-      console.log("message updated")
+      
     });
 
     return () => socket.off("messageReadUpdate");

@@ -6,8 +6,6 @@ const path = require("path"); // Import path module for file extension handling
 const sendAttachments = async (req, res) => {
     try {
         const { sender, chatId, text } = req.body;
-        console.log("Request Body:", req.body); // Debugging
-        console.log("File:", req.file); // Debugging
 
         const fileUrl = req.file ? req.file.path : ""; // Cloudinary File URL
         let fileType = "other"; // Default file type

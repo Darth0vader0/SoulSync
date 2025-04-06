@@ -224,13 +224,11 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
         channelId: selectedChannel._id,
       });
 
-      console.log(
-        `User ${activeUser._id} connected to channel ${selectedChannel._id}`
-      );
+      
 
       // Listen for new messages in real-time
       socket.on("messageReceived", (newMessage) => {
-        console.log("New message received:", newMessage);
+        
 
         // Format the received message
         const fileExtension = newMessage.attachmentUrl
@@ -272,7 +270,6 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
     return () => {
       if (selectedChannel?._id) {
         socket.emit("leaveChannel", selectedChannel._id);
-        console.log(`User left channel ${selectedChannel._id}`);
       }
       socket.off("messageReceived"); // Remove the listener to avoid memory leaks
     };

@@ -4,9 +4,8 @@ const socketUserMap = new Map(); // { socketId -> userId }
 
 const setupVoiceSocket = (io) => {
   io.on("connection", (socket) => {
-    console.log(`🔊 User connected for voice: ${socket.id}`);
 
-    // 🎤 User joins a voice channel
+    //  User joins a voice channel
     socket.on("joinVoiceChannel", ({ channelId, user }) => {
       socketUserMap.set(socket.id, user._id);
 
@@ -48,7 +47,7 @@ const setupVoiceSocket = (io) => {
       socket.to(channelId).emit("ice-candidate", { candidate });
     });
 
-    // 🎤 User manually disconnects from voice
+    // User manually disconnects from voice
     socket.on("leaveVoiceChannel", ({ user }) => {
       if (userChannelMap.has(user._id)) {
         const channelId = userChannelMap.get(user._id);
@@ -56,7 +55,7 @@ const setupVoiceSocket = (io) => {
       }
     });
 
-    // 🎙️ Handle mute/unmute status change
+    //  Handle mute/unmute status change
     socket.on("audio-status-change", ({ isMuted }) => {
       const userId = socketUserMap.get(socket.id);
       if (userId && userChannelMap.has(userId)) {
@@ -71,9 +70,8 @@ const setupVoiceSocket = (io) => {
       }
     });
 
-    // ❌ Handle user disconnection
+    // Handle user disconnection
     socket.on("disconnect", () => {
-      console.log(`❌ Voice user disconnected: ${socket.id}`);
 
       const userId = socketUserMap.get(socket.id);
       if (userId && userChannelMap.has(userId)) {
