@@ -76,7 +76,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
-  const [resourcesChannels,setResourcesChannels]=useState([]);
+  const [resourcesChannels, setResourcesChannels] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [createServerDialogOpen, setCreateServerDialogOpen] = useState(false)
@@ -85,7 +85,9 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
   const [isDmView, setIsDmView] = useState(false)
   const [serverMembers, setServerMembers] = useState([]);
   const [directMessages, setDirectMessages] = useState([])
-
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [createServerName, setCreateServerName] = useState("")
+  const [error, setError] = useState(null)
   useEffect(() => {
     const fetchServers = async () => {
       try {
@@ -154,6 +156,13 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
     setIsDmView(true);
   };
 
+  // Sanitize server name to prevent XSS and SQL injection attacks
+  const sanitizeServerName = (name) => {
+    // Strip HTML/script tags
+    const clean = name.replace(/<[^>]*>?/gm, '');
+    // Remove suspicious characters
+    return clean.replace(/['"`;$]/g, '');
+  };
 
   const handleServerClick = async (server, event) => {
 
@@ -181,12 +190,11 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
       if (data.success) {
         const text = data.channels.filter(channel => channel.type === "text");
         const voice = data.channels.filter(channel => channel.type === "voice");
-        const resources = data.channels.filter(channel=>channel.type ==='resources')
+        const resources = data.channels.filter(channel => channel.type === 'resources')
         setTextChannels(text);
         setVoiceChannels(voice);
         setResourcesChannels(resources);
 
-       
         // ✅ Auto-select the first text channel when switching servers
         if (text.length > 0) {
           setActiveChannel(text[0]);
@@ -288,7 +296,10 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
             <Tooltip>
               <TooltipTrigger asChild>
                 <button className="server-icon bg-muted hover:bg-green-600"
-                  onClick={() => setCreateServerDialogOpen(true)}
+                  onClick={() => {
+                    setCreateServerName("");
+                    setCreateServerDialogOpen(true)
+                  }}
                 >
                   <Plus className="h-6 w-6" />
                 </button>
@@ -518,24 +529,52 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
             <form
               onSubmit={async (e) => {
                 e.preventDefault()
-                const formData = new FormData(e.target)
-                const serverName = formData.get("serverName")
-
+                const serverName = createServerName;
+                // Sanitize server name to prevent XSS and SQL injection attacks;
+                const cleanedName = sanitizeServerName(serverName);
+                const nameRegex = /^[a-zA-Z0-9\s-_]{3,32}$/;
+                setError('')
+                //  VALIDATION
+                if (!cleanedName) {
+                  setError("Server name cannot be empty.");
+                  return;
+                }
+                if (cleanedName.length < 3) {
+                  setError("Server name must be at least 3 characters.");
+                  return;
+                }
+                if (!nameRegex.test(cleanedName)) {
+                  setError("Only letters, numbers, spaces, dashes, and underscores are allowed.");
+                  return;
+                }
+                if (cleanedName.length > 32) {
+                  setError("Server name cannot exceed 32 characters.");
+                  return;
+                }
+                setIsSubmitting(true);
                 try {
                   const response = await fetch("https://soulsync-52q9.onrender.com/createServer", {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: serverName }),
+                    body: JSON.stringify({ name: cleanedName }),
                   })
 
-                  if (!response.ok) throw new Error("Failed to create server")
+                  if (!response.ok) {
+                    const errorData = await response.json()
+                    setError(errorData.message || "Failed to create server")
+                    return;
+                  }
 
                   const result = await response.json()
                   setCreateServerDialogOpen(false)
                   setServers((prevServers) => [...prevServers, result.server]);
+                  setError('');
                 } catch (error) {
-                  console.error("Error creating server:", error)
+                  setError("An error occurred while creating the server. Please try again.");
+                }
+                finally {
+                  setIsSubmitting(false);
                 }
               }}
             >
@@ -548,16 +587,41 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
                     id="serverName"
                     name="serverName"
                     placeholder="My Awesome Server"
+                    value={createServerName}
+                    onChange={(e) => setCreateServerName(e.target.value)}
+                    autoFocus
                     className="col-span-4"
                     required
                   />
                 </div>
               </div>
+              {error && (
+                <div className="text-red-500 text-center font-medium" aria-live="polite">
+                  {error}
+                </div>
+              )}
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setCreateServerDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">Create Server</Button>
+                <Button type="submit">
+                {isSubmitting ? (
+                    <svg
+                      className="animate-spin h-5 w-5 mr-3 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle className="opacity-25" cx="12" cy="12" r="10" fill="none" strokeWidth="4" />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 1 1 16 0A8 8 0 0 1 4 12zm2.5 0a5.5 5.5 0 1 0 11 0A5.5 5.5 0 0 0 6.5 12z"
+                      />
+                    </svg>
+                  ) : (
+                    "Create Server"
+                  )}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
