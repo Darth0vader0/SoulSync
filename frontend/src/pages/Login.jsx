@@ -36,7 +36,7 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3001/login", {
+      const response = await fetch("https://soulsync-52q9.onrender.com/login", {
         method: "POST",
         credentials: "include", // For cookies/session
         headers: {
