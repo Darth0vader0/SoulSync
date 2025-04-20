@@ -5,7 +5,6 @@ const ThemeContext = createContext();
 
 export const CustomThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Load theme from localStorage or default to system theme
     return localStorage.getItem("theme") || "dark";
   });
 

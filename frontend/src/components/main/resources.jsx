@@ -196,7 +196,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
             id: msg._id,
             type, // Use the determined type
             name: msg.attachmentUrl || "Untitled",
-            senderName: msg.sender?.username || "Unknown",
+            senderName: msg.sender?.username || "Unknown",  
             timestamp: msg.createdAt,
             imageUrl: msg.attachmentUrl || null,
             text: msg.text,
@@ -229,7 +229,8 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
       // Listen for new messages in real-time
       socket.on("messageReceived", (newMessage) => {
         
-
+        const exists = prev.some((resource) => resource.id === newMessage._id);
+        if (exists) return prev; // If it exists, do nothing
         // Format the received message
         const fileExtension = newMessage.attachmentUrl
           ? newMessage.attachmentUrl.split(".").pop().toLowerCase()
