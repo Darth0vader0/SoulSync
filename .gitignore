@@ -11,3 +11,4 @@
 /fronted/package.json/
 /fronted/package-lock.json/
 SoulSync-bot/config.env
+frontend/.env

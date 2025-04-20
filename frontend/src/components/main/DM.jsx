@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator"
 import socket from "../../utils/socket";
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL ;
 // Format date (Today, Yesterday, or Full Date)
 const formatDate = (date) => {
   if (!(date instanceof Date)) {
@@ -43,7 +43,7 @@ function DmChatBox({ activeUser, selectedUser }) {
   useEffect(() => {
     const fetchedMessages = async () => {
       try {
-        const response = await fetch(`https://soulsync-52q9.onrender.com/${activeUser._id}/${selectedUser._id}`,
+        const response = await fetch(`${backendUrl}/${activeUser._id}/${selectedUser._id}`,
           {
             method :"GET",
             credentials:"include",

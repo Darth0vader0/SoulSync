@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { AuthLayout } from '../components/AuthLayout';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 // Basic sanitization to remove potential injection characters
 const sanitizeInput = (str) => str.replace(/[<>'"%;()&+]/g, '').trim();
 
@@ -36,7 +36,7 @@ export const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://soulsync-52q9.onrender.com/login", {
+      const response = await fetch(`${backendUrl}/login`, {
         method: "POST",
         credentials: "include", // For cookies/session
         headers: {

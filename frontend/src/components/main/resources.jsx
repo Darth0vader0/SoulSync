@@ -25,6 +25,7 @@ const formatTime = (date) => {
     minute: "2-digit",
   });
 };
+const backendUrl = import.meta.env.VITE_BACKEND_URL; 
 
 // Format date to "Today", "Yesterday", or "Month Day, Year"
 const formatDate = (date) => {
@@ -115,7 +116,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
     setFile(null);
 
     try {
-      const response = await fetch("https://soulsync-52q9.onrender.com/sendAttachments", {
+      const response = await fetch(`${backendUrl}/sendAttachments`, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -165,7 +166,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
 
     try {
       const response = await fetch(
-        `https://soulsync-52q9.onrender.com/getAttachments?channelId=${selectedChannel._id}`,
+        `${backendUrl}/getAttachments?channelId=${selectedChannel._id}`,
         {
           method: "GET",
           credentials: "include",

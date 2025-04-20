@@ -8,6 +8,7 @@ import ResourceSharingBox from "./resources"
 import DM from "./DM"  // Import the DM component
 import image from "../../assets/image-removebg-preview.png";
 import { Skeleton } from "../ui/skeleton"
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import {useNavigate} from 'react-router-dom'
 export default function ServerPage() {
   const [activeChannel, setActiveChannel] = useState(null); // Track selected channel
@@ -17,10 +18,11 @@ export default function ServerPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch("https://soulsync-52q9.onrender.com/getUserData", {
+        const response = await fetch(`${backendUrl}/getUserData`, {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

@@ -37,7 +37,7 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/lable"
 import socket from "../../utils/socket"
 
-// Mock data
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 
@@ -91,7 +91,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
   useEffect(() => {
     const fetchServers = async () => {
       try {
-        const response = await fetch("https://soulsync-52q9.onrender.com/getServers", {
+        const response = await fetch(`${backendUrl}/getServers`, {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -180,7 +180,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
     setTextChannels([]);  // Reset channels before fetching new ones
     setVoiceChannels([]);
     try {
-      const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelsByServer?serverId=${server._id}`, {
+      const response = await fetch(`${backendUrl}/getChannelsByServer?serverId=${server._id}`, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -203,7 +203,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
         console.error("Error fetching channels:", data.message);
       }
       // 🔹 Fetch Server Members
-      const membersResponse = await fetch(`https://soulsync-52q9.onrender.com/server/${server._id}/members`, {
+      const membersResponse = await fetch(`${backendUrl}/server/${server._id}/members`, {
         method: "GET",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -225,7 +225,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
     }, 1000)
   }
   async function getAllUsers() {
-    const response = await fetch("https://soulsync-52q9.onrender.com/getAllUsers", {
+    const response = await fetch(`${backendUrl}/getAllUsers`, {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -553,7 +553,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
                 }
                 setIsSubmitting(true);
                 try {
-                  const response = await fetch("https://soulsync-52q9.onrender.com/createServer", {
+                  const response = await fetch(`${backendUrl}/createServer`, {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
@@ -641,7 +641,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
                 const inviteUrl = formData.get("inviteUrl")
 
                 try {
-                  const response = await fetch(`https://soulsync-52q9.onrender.com/joinServer`, {
+                  const response = await fetch(`${backendUrl}/joinServer`, {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },

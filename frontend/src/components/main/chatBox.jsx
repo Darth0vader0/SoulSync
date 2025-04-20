@@ -31,7 +31,7 @@ import {
 import { Skeleton } from "../ui/skeleton"
 
 import socket from "../../utils/socket"
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL ;
 export default function ChatBox({ activeChannel,activeUser }) {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState("")
@@ -46,7 +46,7 @@ export default function ChatBox({ activeChannel,activeUser }) {
       const fetchMessages = async () => {
         setLoading(true)
         try {
-          const response = await fetch(`https://soulsync-52q9.onrender.com/getChannelMessages?channelId=${activeChannel._id}`,
+          const response = await fetch(`${backendUrl}/getChannelMessages?channelId=${activeChannel._id}`,
             {
               method: "GET",
               credentials: "include",
@@ -143,7 +143,7 @@ export default function ChatBox({ activeChannel,activeUser }) {
       content: newMessage,
     });
 
-     const response = await fetch('https://soulsync-52q9.onrender.com/sendMessageToChannel',{
+     const response = await fetch(`${backendUrl}/sendMessageToChannel`,{
        method: 'POST',
        credentials: 'include',
        headers: {

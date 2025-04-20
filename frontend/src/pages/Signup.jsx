@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { AuthLayout } from '../components/AuthLayout';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 // Function to sanitize basic user input
 const sanitizeInput = (str) => str.replace(/[<>'"%;()&+]/g, '').trim();
 
@@ -52,7 +52,7 @@ export const Signup = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://soulsync-52q9.onrender.com/signup", {
+      const response = await fetch(`${backendUrl}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
