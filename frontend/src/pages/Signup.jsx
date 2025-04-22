@@ -77,6 +77,7 @@ export const Signup = () => {
       if (!signupRes.ok) {
         throw new Error(signupData.message || "Signup failed");
       }
+      console.log("Signup Response:", signupData);
 
       const userId = signupData.user._id;
 

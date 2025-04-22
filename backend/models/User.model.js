@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
   },
   publicKey: {
     type: String,
-    required: [true, 'Public key is required'],
+    default: '',
   },
 });
 

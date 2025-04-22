@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState, useRef, useEffect } from "react";
 import {
   Paperclip,
@@ -7,9 +7,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Separator } from "../ui/separator"
+import { Separator } from "../ui/separator";
 import socket from "../../utils/socket";
-const backendUrl = import.meta.env.VITE_BACKEND_URL ;
+import {
+  encryptMessage,
+  decryptMessage,
+  loadPrivateKey,
+  importPrivateKey,
+  importPublicKey,
+  decryptWithKey
+} from "../../utils/crypto";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 // Format date (Today, Yesterday, or Full Date)
 const formatDate = (date) => {
   if (!(date instanceof Date)) {
@@ -36,44 +46,85 @@ function DmChatBox({ activeUser, selectedUser }) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
+  const [selectedUserPublicKey, setSelectedUserPublicKey] = useState(null);
+
   useEffect(() => {
     socket.emit("userConnectedToDm", activeUser._id);
   }, [activeUser._id]);
 
   useEffect(() => {
-    const fetchedMessages = async () => {
+    const fetchPublicKey = async () => {
       try {
-        const response = await fetch(`${backendUrl}/${activeUser._id}/${selectedUser._id}`,
-          {
-            method :"GET",
-            credentials:"include",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
+        const response = await fetch(`${backendUrl}/getPublicKey/${selectedUser._id}`, {
+          method: "GET",
+          credentials: "include",
+        });
         const data = await response.json();
-        
-        setMessages(data.data);
-
+        setSelectedUserPublicKey(data.publicKey);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to fetch public key:", error);
       }
-    }
-    fetchedMessages();
+    };
 
-  }, [activeUser._id, selectedUser._id])
-  // Socket setup and message listening
+    fetchPublicKey();
+  }, [selectedUser._id]);
+
+  useEffect(() => {
+    const fetchAndDecryptMessages = async () => {
+      try {
+        const response = await fetch(`${backendUrl}/${activeUser._id}/${selectedUser._id}`, {
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await response.json();
+    
+        // Decrypt messages
+        const privateKeyPEM = loadPrivateKey();
+        const privateKey = await importPrivateKey(privateKeyPEM);
+    
+         const processed = await Promise.all(
+          data.data.map( (msg, i) => {
+            // If you sent it, just show the plaintext copy you kept client‑side
+            if (msg.senderId === activeUser._id) {
+              return Promise.resolve({ ...msg, message: msg.plaintext || msg.message });
+            }
+
+            // Otherwise it was encrypted to you—decrypt with your key
+            return decryptWithKey(privateKey, msg.message)
+              .then(plain => ({ ...msg, message: plain }))
+              .catch(err => {
+                console.error(`[DM][#${i}] decryption failed:`, err);
+                return { ...msg, message: '[Decryption failed]' };
+              });
+          })
+        );
+
+        setMessages(processed);
+      } catch (error) {
+        console.error("Error fetching or decrypting messages:", error);
+      }
+    };
+
+    fetchAndDecryptMessages();
+  }, [activeUser, selectedUser]);
+
   useEffect(() => {
     setMessages([]); // Reset messages when switching users
     socket.emit("joinDm", selectedUser._id);
 
-    const handleReceiveMessage = (message) => {
-      
+    const handleReceiveMessage = async (message) => {
       // Only add message if it's for the current chat
       if (
         (message.senderId === activeUser._id && message.receiverId === selectedUser._id) ||
         (message.senderId === selectedUser._id && message.receiverId === activeUser._id)
       ) {
-        setMessages((prevMessages) => [...prevMessages, message]);
+        if (message.senderId !== activeUser._id) {
+          const privateKeyPEM = loadPrivateKey();
+          message.message = await decryptMessage(privateKeyPEM, message.message);
+          setMessages((prevMessages) => [...prevMessages, message]);
+      
+        }
       }
     };
 
@@ -101,12 +152,10 @@ function DmChatBox({ activeUser, selectedUser }) {
           msg._id === messageId ? { ...msg, read: true } : msg
         )
       );
-      
     });
 
     return () => socket.off("messageReadUpdate");
   }, []);
-
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -116,22 +165,38 @@ function DmChatBox({ activeUser, selectedUser }) {
   // Handle Sending Messages
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedUserPublicKey) 
+    {
+      console.error("Message or public key is empty");
+      return;
+
+    }
+
     const messageContent = newMessage.trim();
+
+    // Encrypt the message
+    const encryptedMessage = await encryptMessage(selectedUserPublicKey, messageContent);
+
     const message = {
       id: Date.now().toString(),
-      message: messageContent,
+      message: encryptedMessage,
       senderId: activeUser._id,
       receiverId: selectedUser._id,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        ...message,
+        message: messageContent, // Use plain text for the sender's view
+      },
+    ]);
     setNewMessage("");
     // Emit message through socket
-    socket.emit('sendMessageInDm', message);
-
+    socket.emit("sendMessageInDm", message);
   };
+
   // Group messages by date
   const groupedMessages = [];
   let currentDate = "";
@@ -149,7 +214,6 @@ function DmChatBox({ activeUser, selectedUser }) {
     }
   });
 
-
   return (
     <>
       <div className="flex h-full flex-col">
@@ -166,7 +230,6 @@ function DmChatBox({ activeUser, selectedUser }) {
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 scrollbar-hide">
-
           {groupedMessages.map((group, groupIndex) => (
             <div key={groupIndex} className="mb-4">
               <div className="relative mb-4 flex items-center">
@@ -222,12 +285,10 @@ function DmChatBox({ activeUser, selectedUser }) {
                   </div>
                 );
               })}
-
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
-
 
         {/* Message Input */}
         <div className="border-t border-border p-4">
@@ -248,7 +309,7 @@ function DmChatBox({ activeUser, selectedUser }) {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 export default DmChatBox;
