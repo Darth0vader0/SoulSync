@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  publicKey: {
+    type: String,
+    required: [true, 'Public key is required'],
+  },
 });
 
 const User = mongoose.model('User', UserSchema);

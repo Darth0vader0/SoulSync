@@ -1,10 +1,20 @@
+
+// src/components/Signup.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthLayout } from '../components/AuthLayout';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import {
+  generateKeyPair,
+  exportKeys,
+  savePrivateKey,
+  sendPublicKeyToBackend
+} from '../utils/crypto';
+
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-// Function to sanitize basic user input
+
+// Basic sanitizer to strip dangerous characters
 const sanitizeInput = (str) => str.replace(/[<>'"%;()&+]/g, '').trim();
 
 export const Signup = () => {
@@ -21,13 +31,13 @@ export const Signup = () => {
     e.preventDefault();
     setError(null);
 
-    // Regex Validators
+    // Validation patterns
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     const usernameRegex = /^[a-zA-Z0-9_]{3,}$/;
     const injectionPattern = /('|--|;|\/\*|\*\/|xp_|union|select|drop|insert|delete|update)/i;
 
-    // Input Validation
+    // Validate inputs
     if (!usernameRegex.test(formData.username)) {
       return setError("Username must be at least 3 characters and use only letters, numbers, or underscores.");
     }
@@ -40,40 +50,45 @@ export const Signup = () => {
     if (formData.password !== formData.confirmPassword) {
       return setError("Passwords do not match.");
     }
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
-      return setError("Please fill in all fields.");
-    }
     if (injectionPattern.test(formData.username) || injectionPattern.test(formData.email)) {
       return setError("Malicious patterns detected in input.");
     }
 
-    // Prevent double submission
     if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${backendUrl}/signup`, {
+      // Generate RSA key pair client-side
+      const keyPair = await generateKeyPair();
+      // Export keys to PEM
+      const { publicKeyPEM, privateKeyPEM } = await exportKeys(keyPair);
+
+      // First register user and get their userId
+      const signupRes = await fetch(`${backendUrl}/signup`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: sanitizeInput(formData.username),
           email: sanitizeInput(formData.email),
-          password: formData.password,
+          password: formData.password
         }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Signup failed");
+      const signupData = await signupRes.json();
+      if (!signupRes.ok) {
+        throw new Error(signupData.message || "Signup failed");
       }
 
-      console.log("Signup Successful:", data);
+      const userId = signupData.user._id;
+
+      // Send public key to backend for storage
+      await sendPublicKeyToBackend(userId, publicKeyPEM);
+      // Save private key locally for decrypting messages
+      savePrivateKey(privateKeyPEM);
+
+      console.log("🔐 Key pair generated and stored successfully.", signupData);
       window.location.href = "/login";
     } catch (err) {
-      console.error("Signup Error:", err.message);
+      console.error("Signup Error:", err);
       setError(err.message);
     } finally {
       setIsSubmitting(false);
@@ -142,3 +157,4 @@ export const Signup = () => {
     </AuthLayout>
   );
 };
+

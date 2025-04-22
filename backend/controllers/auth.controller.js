@@ -21,7 +21,7 @@ const registerUser = async (req, res) => {
     user = new User({ username, email, password: hashedPassword });
     await user.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    res.status(201).json({ message: "User registered successfully" ,user : user});
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
@@ -39,6 +39,34 @@ const getAllUsers = async (req,res)=>{
     res.status(500).json({ message: "Server error", error });
   }
 }
+
+const savePublicKey = async (req,res) => {
+
+  try {
+    const { userId, publicKey } = req.body;
+
+    if (!userId || !publicKey) {
+      return res.status(400).json({ message: 'userId and publicKey are required' });
+    }
+
+    // Update the user’s document
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { publicKey },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({ message: 'Public key stored', userId: user._id });
+  } catch (err) {
+    console.error('Error storing public key:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 // Login User
 const loginUser = async (req, res) => {
  
@@ -91,4 +119,4 @@ const logout = (req,res)=>{
 });
 res.status(200).json({ message: "Logged out successfully" });
 }
-module.exports = { registerUser, loginUser ,logout,getUserData,getAllUsers};
+module.exports = { registerUser, loginUser ,logout,getUserData,getAllUsers,savePublicKey};

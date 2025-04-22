@@ -11,7 +11,7 @@ const { Server } = require("socket.io");
 
 
 const PORT = 3001;
-const {registerUser, loginUser,logout,getUserData,getAllUsers} = require('./controllers/auth.controller')
+const {registerUser, loginUser,logout,getUserData,getAllUsers,savePublicKey} = require('./controllers/auth.controller')
 const {getMessages,sendMessageToChannel,getChannelMessages} = require('./controllers/message.controller')
 const authMiddleware = require('./middleware/auth.middleware');
 const uploadMiddleware = require('./middleware/attachments.middleware');
@@ -63,7 +63,7 @@ app.post('/login', loginUser)
 app.get('/getUserData',authMiddleware,getUserData)
 app.get('/getAllUsers',authMiddleware,getAllUsers)
 app.get('/logout',logout)
-
+app.post('/savePublicKey',savePublicKey);
 //messages api
 app.get('/:senderId/:receiverId',authMiddleware,getMessages);
 app.post('/sendMessageToChannel',authMiddleware,sendMessageToChannel);
