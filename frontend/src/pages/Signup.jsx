@@ -60,6 +60,7 @@ export const Signup = () => {
     try {
       // Generate RSA key pair client-side
       const keyPair = await generateKeyPair();
+      
       // Export keys to PEM
       const { publicKeyPEM, privateKeyPEM } = await exportKeys(keyPair);
 

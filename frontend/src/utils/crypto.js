@@ -174,3 +174,31 @@ export async function sendPublicKeyToBackend(userId, publicKeyPEM) {
   }
   return response.json();
 }
+
+
+/**
+ work flow: 
+  1. Generate RSA key pair client-side
+  2. Export keys to PEM format
+  3. Register user and get their userId
+  4. Send public key to backend for storage
+  5. Save private key locally for decrypting messages
+  6. Use the public key to encrypt messages before sending them to the backend
+  7. Use the private key to decrypt messages received from the backend
+
+
+  now process of encrypting :
+  user will select a friend from the list of friends , then 
+  get the public key of that friend from the backend 
+  send the message ,
+  that message will convert to binary 
+  then encrypted using the public key of that friend
+  then send the encrypted message to the backend
+  the backend will save the message in the database
+  then send the message to the friend using socket io
+  the friend will get the message and then
+  that message will convert to binary
+  then decrypt using the private key of that friend
+  decrypted message will convert to base64 again 
+  and show it to the chat window
+  */

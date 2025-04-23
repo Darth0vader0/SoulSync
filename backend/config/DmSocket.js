@@ -40,10 +40,12 @@ const DmSocket = (io) => {
       }
     });
     // read messages
-    socket.on("messageRead", async ({ messageId, senderId }) => {
+    socket.on("messageRead", async ({ messageId, senderId, receiverId }) => {
       try {
         await Message.findByIdAndUpdate(messageId, { read: true });
+        console.log("Message read status updated in DB");
         io.to(senderId).emit("messageReadUpdate", { messageId });
+        
       } catch (error) {
         console.error("Error updating read status:", error);
       }
