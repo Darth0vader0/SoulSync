@@ -229,42 +229,44 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
 
       // Listen for new messages in real-time
       socket.on("messageReceived", (newMessage) => {
-        
-        const exists = prev.some((resource) => resource.id === newMessage._id);
-        if (exists) return prev; // If it exists, do nothing
-        // Format the received message
-        const fileExtension = newMessage.attachmentUrl
-          ? newMessage.attachmentUrl.split(".").pop().toLowerCase()
-          : "";
-        let type = "file"; // Default type
-
-        // Determine the type based on the file extension
-        if (["png", "jpg", "jpeg", "gif", "bmp", "webp"].includes(fileExtension)) {
-          type = "image";
-        } else if (
-          ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"].includes(fileExtension)
-        ) {
-          type = "video";
-        } else if (["mp3", "wav", "aac", "flac", "ogg"].includes(fileExtension)) {
-          type = "audio";
-        } else if (fileExtension === "pdf") {
-          type = "pdf";
-        }
-
-        // Add the new message to the resources state
-        setResources((prev) => [
-          ...prev,
-          {
-            id: newMessage._id,
-            type, // Use the determined type
-            name: newMessage.attachmentUrl || "Untitled",
-            senderName: newMessage.sender?.username || "Unknown",
-            timestamp: newMessage.createdAt,
-            imageUrl: newMessage.attachmentUrl || null,
-            text: newMessage.text,
-            loading: false,
-          },
-        ]);
+        setResources((prev) => {
+          const exists = prev.some((resource) => resource.id === newMessage._id);
+          if (exists) return prev; // If it exists, return the previous state unchanged
+      
+          // Format the received message
+          const fileExtension = newMessage.attachmentUrl
+            ? newMessage.attachmentUrl.split(".").pop().toLowerCase()
+            : "";
+          let type = "file"; // Default type
+      
+          // Determine the type based on the file extension
+          if (["png", "jpg", "jpeg", "gif", "bmp", "webp"].includes(fileExtension)) {
+            type = "image";
+          } else if (
+            ["mp4", "mkv", "mov", "avi", "flv", "wmv", "webm"].includes(fileExtension)
+          ) {
+            type = "video";
+          } else if (["mp3", "wav", "aac", "flac", "ogg"].includes(fileExtension)) {
+            type = "audio";
+          } else if (fileExtension === "pdf") {
+            type = "pdf";
+          }
+      
+          // Add the new message to the resources state
+          return [
+            ...prev,
+            {
+              id: newMessage._id,
+              type, // Use the determined type
+              name: newMessage.attachmentUrl || "Untitled",
+              senderName: newMessage.sender?.username || "Unknown",
+              timestamp: newMessage.createdAt,
+              imageUrl: newMessage.attachmentUrl || null,
+              text: newMessage.text,
+              loading: false,
+            },
+          ];
+        });
       });
     }
 

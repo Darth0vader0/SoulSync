@@ -113,6 +113,8 @@ export default function VoiceChannelUI({ activeChannel, setActiveChannel, active
       socket.off("ice-candidate")
     };
   }, [activeChannel, activeUser,activeChannel._id, activeUser._id, activeUser.username]);
+
+  
   const handleStartAudio = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
