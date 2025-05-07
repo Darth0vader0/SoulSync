@@ -229,6 +229,7 @@ function ResourceSharingBox({ activeUser, selectedChannel }) {
 
       // Listen for new messages in real-time
       socket.on("messageReceived", (newMessage) => {
+        if (newMessage.sender === activeUser._id) return; // Ignore own messages
         setResources((prev) => {
           const exists = prev.some((resource) => resource.id === newMessage._id);
           if (exists) return prev; // If it exists, return the previous state unchanged
