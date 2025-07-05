@@ -71,7 +71,7 @@ const styleSheet = document.createElement("style")
 styleSheet.type = "text/css"
 styleSheet.innerText = serverIconCSS
 document.head.appendChild(styleSheet)
-export default function Sidebar({ setActiveChannel, activeChannel, activeUser, setActiveDmChat }) {
+export default function Sidebar({ setActiveChannel, activeChannel, activeUser, setActiveDmChat ,setPreviousChannel}) {
   const [servers, setServers] = useState([]);       // List of all servers
   const [activeServer, setActiveServer] = useState([]); // Selected server
   const [textChannels, setTextChannels] = useState([]);
@@ -239,6 +239,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
   }
 
   const handleChannelClick = (channel) => {
+    setPreviousChannel(activeChannel)
     setActiveChannel(channel)
   }
   const handleInviteClick = async () => {

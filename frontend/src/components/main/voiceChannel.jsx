@@ -24,8 +24,8 @@ import {
 import { Slider } from "../ui/slider"
 import socket from "../../utils/socket"
 
-export default function VoiceChannelUI({ activeChannel, setActiveChannel, activeUser }) {
-  const [isMuted, setIsMuted] = useState(false);
+export default function VoiceChannelUI({ activeChannel, setActiveChannel, activeUser ,previousChannel}) {
+  const [isMuted, setIsMuted] = useState(true);
   const [isDeafened, setIsDeafened] = useState(false);
   const [hasVideo, setHasVideo] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -117,6 +117,7 @@ export default function VoiceChannelUI({ activeChannel, setActiveChannel, active
   
   const handleStartAudio = async () => {
     try {
+      setIsMuted(!isMuted)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       localStreamRef.current.srcObject = stream
 
@@ -139,7 +140,7 @@ export default function VoiceChannelUI({ activeChannel, setActiveChannel, active
       peerConnectionRef.current.close()
     }
     socket.emit("leave-channel", { channelId: activeChannel._id })
-    setActiveChannel(null);
+    setActiveChannel(previousChannel);
   }
 
  

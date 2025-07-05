@@ -17,6 +17,7 @@ export default function ServerPage() {
   const [activerServerData, setActiveServerData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [previousChannel,setPreviousChannel] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,6 +89,7 @@ export default function ServerPage() {
         activeChannel={activeChannel}
         activeUser={user}
         setActiveDmChat={setActiveDmChat} // Pass DM handler to Sidebar
+        setPreviousChannel = {setPreviousChannel}
       />
       <div className="flex flex-1 flex-col overflow-hidden">
         {activeDmChat ? (
@@ -96,7 +98,7 @@ export default function ServerPage() {
           activeChannel.type === "text" ? (
             <ChatBox activeChannel={activeChannel} activeUser={user} />
           ) : activeChannel.type==='voice'?(
-            <VoiceChannelUI activeChannel={activeChannel} setActiveChannel={setActiveChannel} activerServerData={activerServerData} activeUser={user} />
+            <VoiceChannelUI activeChannel={activeChannel} setActiveChannel={setActiveChannel} activerServerData={activerServerData} previousChannel={previousChannel} activeUser={user} />
           ):
           (
             <ResourceSharingBox  selectedChannel={activeChannel} activeUser={user} />
