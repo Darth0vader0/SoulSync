@@ -40,14 +40,33 @@ export default function VoiceChannelUI({ activeChannel, setActiveChannel, active
     socket.emit("audio-status-change", { isMuted });
   }, [isMuted]);
 
-  // Handle updated user list
+  // Handle updated user list and user join/leave events
   useEffect(() => {
+    // userList keeps the list in sync
     socket.on("userList", (users) => {
+      console.log("userList when new user joins");
       setConnectedUsers(users);
+    });
+
+    // Add new user to the list
+    socket.on("userJoined", (user) => {
+      console.log("new userJoined");
+      setConnectedUsers(prev => {
+        // Avoid duplicates if userList comes in at the same time
+        if (prev.some(u => u.id === user.id)) return prev;
+        return [...prev, user];
+      });
+    });
+
+    // Remove user from the list
+    socket.on("userLeft", ({ userId }) => {
+      setConnectedUsers(prev => prev.filter(u => u.id !== userId));
     });
 
     return () => {
       socket.off("userList");
+      socket.off("userJoined");
+      socket.off("userLeft");
     };
   }, []);
 

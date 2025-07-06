@@ -234,7 +234,7 @@ export default function Sidebar({ setActiveChannel, activeChannel, activeUser, s
     if (data.success) {
       return data.users
     } else {
-      console.error("Error fetching users:", data.message)
+      console.error("Error fetching userPs:", data.message)
     }
   }
 
