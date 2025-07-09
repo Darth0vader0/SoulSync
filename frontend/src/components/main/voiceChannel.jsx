@@ -158,7 +158,7 @@ export default function VoiceChannelUI({ activeChannel, setActiveChannel, active
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close()
     }
-    socket.emit("leave-channel", { channelId: activeChannel._id })
+    socket.emit("leaveVoiceChannel", { user:activeUser})
     setActiveChannel(previousChannel);
   }
 
